@@ -62,7 +62,10 @@ s.anonymous = true
 
 -- Tabs
 s:tab("basic", translate("Basic Settings"))
+s:tab("http", translate("HTTP Settings"))
 s:tab("advanced", translate("Advanced Settings"))
+s:tab("health", translate("Health Check"))
+s:tab("stcp", translate("STCP/XTCP"))
 
 -- === Basic Settings Tab ===
 
@@ -78,6 +81,7 @@ o:value("tcp", "TCP")
 o:value("udp", "UDP")
 o:value("http", "HTTP")
 o:value("https", "HTTPS")
+o:value("tcpmux", "TCPMux")
 o:value("stcp", "STCP")
 o:value("xtcp", "XTCP")
 o:value("sudp", "SUDP")
@@ -108,13 +112,16 @@ o = s:taboption("basic", Value, "custom_domains", translate("Custom Domains"),
 o.rmempty = true
 o:depends("type", "http")
 o:depends("type", "https")
+o:depends("type", "tcpmux")
 
 o = s:taboption("basic", Value, "subdomain", translate("Subdomain"),
-	translate("Subdomain for HTTP/HTTPS proxy"))
+	translate("Subdomain for proxy"))
 o.rmempty = true
 o:depends("type", "http")
 o:depends("type", "https")
+o:depends("type", "tcpmux")
 
+-- Plugin section
 o = s:taboption("basic", ListValue, "plugin_type", translate("Plugin"))
 o:value("", translate("None"))
 o:value("socks5", "socks5")
@@ -136,17 +143,176 @@ o.rmempty = true
 o:depends("plugin_type", "socks5")
 o:depends("plugin_type", "http_proxy")
 
+-- Plugin advanced options
+o = s:taboption("basic", Value, "plugin_local_path", translate("Local Path"),
+	translate("Local path for static_file plugin"))
+o.rmempty = true
+o:depends("plugin_type", "static_file")
+
+o = s:taboption("basic", Value, "plugin_strip_prefix", translate("Strip Prefix"),
+	translate("Strip prefix for static_file plugin"))
+o.rmempty = true
+o:depends("plugin_type", "static_file")
+
+o = s:taboption("basic", Value, "plugin_http_user", translate("Plugin HTTP User"),
+	translate("HTTP user for static_file plugin"))
+o.rmempty = true
+o:depends("plugin_type", "static_file")
+
+o = s:taboption("basic", Value, "plugin_http_passwd", translate("Plugin HTTP Password"),
+	translate("HTTP password for static_file plugin"))
+o.password = true
+o.rmempty = true
+o:depends("plugin_type", "static_file")
+
+o = s:taboption("basic", Value, "plugin_addr", translate("Plugin Address"),
+	translate("Address for unix_domain_socket plugin"))
+o.rmempty = true
+o:depends("plugin_type", "unix_domain_socket")
+
+o = s:taboption("basic", Value, "sni_rewrite", translate("SNI Rewrite"),
+	translate("SNI rewrite for sni proxy"))
+o.rmempty = true
+o:depends("plugin_type", "sni")
+
+-- === HTTP Settings Tab ===
+-- Applies to: http, https, tcpmux
+
+o = s:taboption("http", Value, "http_user", translate("HTTP Basic Auth User"),
+	translate("Username for HTTP basic authentication"))
+o.rmempty = true
+o:depends("type", "http")
+o:depends("type", "https")
+
+o = s:taboption("http", Value, "http_pwd", translate("HTTP Basic Auth Password"),
+	translate("Password for HTTP basic authentication"))
+o.password = true
+o.rmempty = true
+o:depends("type", "http")
+o:depends("type", "https")
+
+o = s:taboption("http", Value, "host_header_rewrite", translate("Host Header Rewrite"),
+	translate("Rewrite the HTTP Host header to this value"))
+o.rmempty = true
+o:depends("type", "http")
+o:depends("type", "https")
+o:depends("type", "tcpmux")
+
+o = s:taboption("http", Value, "locations", translate("Locations"),
+	translate("URL routing paths separated by | (e.g. /api|/static)"))
+o.rmempty = true
+o.placeholder = "/api|/static"
+o:depends("type", "http")
+o:depends("type", "https")
+o:depends("type", "tcpmux")
+
+o = s:taboption("http", Value, "request_headers", translate("Request Headers"),
+	translate("Custom request headers separated by | (e.g. X-Custom:val1|Authorization:Bearer token)"))
+o.rmempty = true
+o.placeholder = "X-Custom:val1|Authorization:Bearer token"
+o:depends("type", "http")
+o:depends("type", "https")
+
+o = s:taboption("http", Value, "response_headers", translate("Response Headers"),
+	translate("Custom response headers separated by | (e.g. X-Response:val1|X-Request-Id:abc)"))
+o.rmempty = true
+o.placeholder = "X-Response:val1"
+o:depends("type", "http")
+o:depends("type", "https")
+
+o = s:taboption("http", Value, "route_by_http_user", translate("Route by HTTP User"),
+	translate("Route requests to different proxies based on HTTP Basic Auth user"))
+o.rmempty = true
+o:depends("type", "http")
+
+o = s:taboption("http", ListValue, "multiplexer", translate("Multiplexer"),
+	translate("HTTP connect multiplexer type"))
+o:value("", translate("Default"))
+o:value("httpconnect", "HTTPConnect")
+o.rmempty = true
+o:depends("type", "http")
+o:depends("type", "https")
+o:depends("type", "tcpmux")
+
+-- === STCP/XTCP/SUDP Tab ===
+
+o = s:taboption("stcp", ListValue, "role", translate("Role"),
+	translate("Role: server (provides service) or visitor (accesses service)"))
+o:value("", translate("Default"))
+o:value("server", "server")
+o:value("visitor", "visitor")
+o.rmempty = true
+o:depends("type", "stcp")
+o:depends("type", "xtcp")
+o:depends("type", "sudp")
+
+o = s:taboption("stcp", Value, "secret_key", translate("Secret Key"),
+	translate("Secret key for STCP/XTCP/SUDP visitors"))
+o.rmempty = true
+o:depends("type", "stcp")
+o:depends("type", "xtcp")
+o:depends("type", "sudp")
+
+o = s:taboption("stcp", Value, "server_name", translate("Server Name"),
+	translate("Server name for visitor to connect to (the name of the server-side proxy)"))
+o.rmempty = true
+o:depends("type", "stcp")
+o:depends("type", "xtcp")
+o:depends("type", "sudp")
+
+o = s:taboption("stcp", Value, "allow_users", translate("Allow Users"),
+	translate("Comma-separated list of users allowed to connect (empty = all users)"))
+o.rmempty = true
+o:depends("type", "stcp")
+o:depends("type", "xtcp")
+o:depends("type", "sudp")
+
+-- === Health Check Tab ===
+
+o = s:taboption("health", ListValue, "health_check_type", translate("Health Check Type"),
+	translate("Health check type: tcp or http"))
+o:value("", translate("None"))
+o:value("tcp", "TCP")
+o:value("http", "HTTP")
+o.rmempty = true
+
+o = s:taboption("health", Value, "health_check_timeout_s", translate("Health Check Timeout (s)"),
+	translate("Timeout for each health check request"))
+o.datatype = "uinteger"
+o.rmempty = true
+
+o = s:taboption("health", Value, "health_check_max_failed", translate("Max Failures"),
+	translate("Number of consecutive failures before marking as unavailable"))
+o.datatype = "uinteger"
+o.rmempty = true
+
+o = s:taboption("health", Value, "health_check_interval_s", translate("Check Interval (s)"),
+	translate("Interval between health checks"))
+o.datatype = "uinteger"
+o.rmempty = true
+
+o = s:taboption("health", Value, "health_check_path", translate("Health Check Path"),
+	translate("HTTP path for health check (HTTP type only, e.g. /healthz)"))
+o.rmempty = true
+o:depends("health_check_type", "http")
+
+o = s:taboption("health", Value, "health_check_headers", translate("Health Check Headers"),
+	translate("Custom HTTP headers separated by | (e.g. Authorization:Basic xxx|X-Token:abc)"))
+o.rmempty = true
+o.placeholder = "Authorization:Basic xxx"
+o:depends("health_check_type", "http")
+
 -- === Advanced Settings Tab ===
 
 o = s:taboption("advanced", ListValue, "use_encryption", translate("Encryption"),
-	translate("Enable encryption for this proxy (true/false)"))
+	translate("Enable encryption for this proxy"))
 o:value("", translate("Default"))
 o:value("true", translate("Yes"))
 o:value("false", translate("No"))
 o.rmempty = true
 
 o = s:taboption("advanced", ListValue, "use_compression", translate("Compression"),
-	translate("Enable compression for this proxy (true/false)"))
+	translate("Enable compression for this proxy"))
 o:value("", translate("Default"))
 o:value("true", translate("Yes"))
 o:value("false", translate("No"))
@@ -156,55 +322,11 @@ o = s:taboption("advanced", Value, "bandwidth_limit", translate("Bandwidth Limit
 	translate("Bandwidth limit, e.g. 100KB or 1MB"))
 o.rmempty = true
 
-o = s:taboption("advanced", ListValue, "bandwidth_limit_mode", translate("Bandwidth Limit Mode"),
-	translate("client or server"))
+o = s:taboption("advanced", ListValue, "bandwidth_limit_mode", translate("Bandwidth Limit Mode"))
 o:value("", translate("Default"))
 o:value("client", "client")
 o:value("server", "server")
 o.rmempty = true
-
-o = s:taboption("advanced", Value, "pool_count", translate("Connection Pool"),
-	translate("Number of connections to keep in connection pool"))
-o.datatype = "uinteger"
-o.rmempty = true
-
-o = s:taboption("advanced", ListValue, "health_check_type", translate("Health Check Type"),
-	translate("Health check type: tcp or http"))
-o:value("", translate("None"))
-o:value("tcp", "TCP")
-o:value("http", "HTTP")
-o.rmempty = true
-
-o = s:taboption("advanced", Value, "health_check_timeout_s", translate("Health Check Timeout (s)"))
-o.datatype = "uinteger"
-o.rmempty = true
-
-o = s:taboption("advanced", Value, "health_check_max_failed", translate("Max Health Check Failures"))
-o.datatype = "uinteger"
-o.rmempty = true
-
-o = s:taboption("advanced", Value, "health_check_interval_s", translate("Health Check Interval (s)"))
-o.datatype = "uinteger"
-o.rmempty = true
-
-o = s:taboption("advanced", Value, "http_user", translate("HTTP Basic Auth User"),
-	translate("Username for HTTP basic authentication"))
-o.rmempty = true
-o:depends("type", "http")
-o:depends("type", "https")
-
-o = s:taboption("advanced", Value, "http_pwd", translate("HTTP Basic Auth Password"),
-	translate("Password for HTTP basic authentication"))
-o.password = true
-o.rmempty = true
-o:depends("type", "http")
-o:depends("type", "https")
-
-o = s:taboption("advanced", TextValue, "locations", translate("Locations"),
-	translate("URL routing paths, one per line"))
-o.rmempty = true
-o.rows = 3
-o:depends("type", "http")
 
 o = s:taboption("advanced", ListValue, "transport_type", translate("Transport Type"),
 	translate("Transport type: tcp or websocket"))
@@ -220,61 +342,15 @@ o:value("v1", "v1")
 o:value("v2", "v2")
 o.rmempty = true
 
--- STCP/XTCP options
-o = s:taboption("advanced", Value, "secret_key", translate("Secret Key"),
-	translate("Secret key for STCP/XTCP visitors"))
+o = s:taboption("advanced", Value, "pool_count", translate("Connection Pool"),
+	translate("Number of connections to keep in connection pool"))
+o.datatype = "uinteger"
 o.rmempty = true
-o:depends("type", "stcp")
-o:depends("type", "xtcp")
 
-o = s:taboption("advanced", ListValue, "role", translate("Role"),
-	translate("Role: server or visitor"))
-o:value("", translate("Default"))
-o:value("server", "server")
-o:value("visitor", "visitor")
+o = s:taboption("advanced", Value, "metadatas", translate("Metadatas"),
+	translate("Custom metadata separated by | (e.g. Key1:Value1|Key2:Value2)"))
 o.rmempty = true
-o:depends("type", "stcp")
-o:depends("type", "xtcp")
-
-o = s:taboption("advanced", Value, "server_name", translate("Server Name"),
-	translate("Server name for STCP/XTCP visitor to connect to"))
-o.rmempty = true
-o:depends("type", "stcp")
-o:depends("type", "xtcp")
-
--- Static file plugin options
-o = s:taboption("advanced", Value, "plugin_local_path", translate("Local Path"),
-	translate("Local path for static_file plugin"))
-o.rmempty = true
-o:depends("plugin_type", "static_file")
-
-o = s:taboption("advanced", Value, "plugin_strip_prefix", translate("Strip Prefix"),
-	translate("Strip prefix for static_file plugin"))
-o.rmempty = true
-o:depends("plugin_type", "static_file")
-
-o = s:taboption("advanced", Value, "plugin_http_user", translate("Plugin HTTP User"),
-	translate("HTTP user for static_file plugin"))
-o.rmempty = true
-o:depends("plugin_type", "static_file")
-
-o = s:taboption("advanced", Value, "plugin_http_passwd", translate("Plugin HTTP Password"),
-	translate("HTTP password for static_file plugin"))
-o.password = true
-o.rmempty = true
-o:depends("plugin_type", "static_file")
-
--- unix_domain_socket plugin
-o = s:taboption("advanced", Value, "plugin_addr", translate("Plugin Address"),
-	translate("Address for unix_domain_socket plugin"))
-o.rmempty = true
-o:depends("plugin_type", "unix_domain_socket")
-
--- sni plugin
-o = s:taboption("advanced", Value, "sni_rewrite", translate("SNI Rewrite"),
-	translate("SNI rewrite for sni proxy"))
-o.rmempty = true
-o:depends("plugin_type", "sni")
+o.placeholder = "Key1:Value1|Key2:Value2"
 
 m.on_after_commit = function(self)
 	luci.util.exec("/etc/init.d/frpc restart >/dev/null 2>&1 &")

@@ -1,107 +1,200 @@
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
-"Project-Id-Version: luci-app-frpc-new\n"
-"POT-Creation-Date: 2025-01-01 00:00+0000\n"
-"PO-Revision-Date: 2025-01-01 00:00+0000\n"
-"Last-Translator: \n"
-"Language-Team: Chinese (Simplified)\n"
-"Language: zh_CN\n"
-"MIME-Version: 1.0\n"
-"Content-Transfer-Encoding: 8bit\n"
 
-msgid "Collecting..."
-msgstr "正在获取..."
+# === Controller / Menu ===
+msgid "frpc"
+msgstr "frpc 内网穿透客户端"
 
-msgid "Config Generated"
-msgstr "配置已生成"
+msgid "frpc Client Settings"
+msgstr "frpc 客户端设置"
 
-msgid "Configure frpc client for frp >= 0.52.0 (TOML-based). UCI config is the source of truth; TOML is generated automatically on save."
-msgstr "配置 frpc 客户端，适用于 frp >= 0.52.0（TOML 格式）。UCI 配置为数据源，保存时自动生成 TOML 配置文件。"
+msgid "Settings"
+msgstr "设置"
+
+msgid "Status"
+msgstr "状态"
+
+# === frpc-client.lua ===
+
+msgid "Configuration for the frpc client and its proxy list."
+msgstr "配置 frpc 客户端连接参数和代理列表。"
+
+msgid "Server Connection"
+msgstr "服务器连接"
+
+msgid "Server Address"
+msgstr "服务器地址"
+
+msgid "Server Port"
+msgstr "服务器端口"
+
+msgid "Authentication"
+msgstr "认证"
+
+msgid "Authentication Method"
+msgstr "认证方式"
+
+msgid "Token"
+msgstr "令牌"
+
+msgid "Transport"
+msgstr "传输设置"
+
+msgid "Protocol"
+msgstr "通信协议"
+
+msgid "Communication protocol between frpc and frps"
+msgstr "frpc 与 frps 之间的通信协议"
+
+msgid "TLS"
+msgstr "TLS 加密"
+
+msgid "Enable TLS encryption for the connection"
+msgstr "启用 TLS 加密连接"
+
+msgid "TCP Mux"
+msgstr "TCP 多路复用"
+
+msgid "Enable TCP multiplexing for connection reuse"
+msgstr "启用 TCP 多路复用以重用连接"
 
 msgid "Connection Pool"
 msgstr "连接池"
 
-msgid "Custom Domains"
-msgstr "自定义域名"
+msgid "Number of connections to keep in connection pool"
+msgstr "保持在连接池中的连接数量"
 
-msgid "Default"
-msgstr "默认"
+msgid "Heartbeat Interval"
+msgstr "心跳间隔"
+
+msgid "Interval for sending heartbeat to server (seconds)"
+msgstr "向服务器发送心跳的间隔（秒）"
+
+msgid "Heartbeat Timeout"
+msgstr "心跳超时"
+
+msgid "Timeout for heartbeat response (seconds)"
+msgstr "心跳响应超时时间（秒）"
+
+msgid "Log Settings"
+msgstr "日志设置"
+
+msgid "Log Level"
+msgstr "日志级别"
+
+msgid "Default (info)"
+msgstr "默认（info）"
+
+msgid "Log Retention (days)"
+msgstr "日志保留天数"
+
+msgid "Maximum number of days to keep log files"
+msgstr "日志文件最大保留天数"
+
+msgid "Advanced"
+msgstr "高级设置"
+
+msgid "Exit on Login Failure"
+msgstr "登录失败时退出"
+
+msgid "Exit frpc when login to server fails"
+msgstr "登录服务器失败时退出 frpc"
+
+msgid "DNS Server"
+msgstr "DNS 服务器"
+
+msgid "Custom DNS server address (e.g. 8.8.8.8)"
+msgstr "自定义 DNS 服务器地址（如 8.8.8.8）"
+
+msgid "Metadatas"
+msgstr "元数据"
+
+msgid "Client metadata separated by | (e.g. Key1:Value1|Key2:Value2)"
+msgstr "客户端元数据，用 | 分隔（如 Key1:Value1|Key2:Value2）"
+
+msgid "Proxy List"
+msgstr "代理列表"
+
+msgid "Each proxy defines a tunnel through the frp server."
+msgstr "每个代理定义一条通过 frp 服务器的隧道。"
 
 msgid "Enable"
 msgstr "启用"
 
-msgid "Enable TLS"
-msgstr "启用 TLS"
+msgid "Proxy Name"
+msgstr "代理名称"
 
-msgid "Enable frpc"
-msgstr "启用 frpc"
+msgid "Type"
+msgstr "类型"
 
-msgid "Encryption"
-msgstr "加密"
+msgid "Local IP"
+msgstr "本地 IP"
 
-msgid "Bandwidth Limit"
-msgstr "带宽限制"
+msgid "Local Port"
+msgstr "本地端口"
 
-msgid "Bandwidth Limit Mode"
-msgstr "带宽限制模式"
+msgid "Target"
+msgstr "目标"
 
-msgid "Compression"
-msgstr "压缩"
+msgid "Add Proxy"
+msgstr "添加代理"
 
-msgid "Health Check Type"
-msgstr "健康检查类型"
+# === frpc-proxy.lua ===
 
-msgid "Health Check Timeout (s)"
-msgstr "健康检查超时（秒）"
+msgid "Proxy Configuration"
+msgstr "代理配置"
 
-msgid "Max Health Check Failures"
-msgstr "最大健康检查失败次数"
+msgid "Proxy Settings"
+msgstr "代理设置"
 
-msgid "Health Check Interval (s)"
-msgstr "健康检查间隔（秒）"
+msgid "Basic Settings"
+msgstr "基本设置"
 
-msgid "HTTP Basic Auth User"
-msgstr "HTTP 基本认证用户名"
+msgid "HTTP Settings"
+msgstr "HTTP 设置"
 
-msgid "HTTP Basic Auth Password"
-msgstr "HTTP 基本认证密码"
+msgid "Health Check"
+msgstr "健康检查"
 
-msgid "URL routing paths, one per line"
-msgstr "URL 路由路径，每行一条"
+msgid "STCP/XTCP"
+msgstr "STCP/XTCP"
 
-msgid "Locations"
-msgstr "路径"
+msgid "Local service IP address"
+msgstr "本地服务 IP 地址"
 
-msgid "Transport Type"
-msgstr "传输类型"
+msgid "Local service port"
+msgstr "本地服务端口"
 
-msgid "Transport type: tcp or websocket"
-msgstr "传输类型：tcp 或 websocket"
+msgid "Remote Port"
+msgstr "远程端口"
 
-msgid "Proxy Protocol Version"
-msgstr "代理协议版本"
+msgid "Port on the frps server to expose"
+msgstr "在 frps 服务器上暴露的端口"
 
-msgid "Proxy protocol version: v1 or v2"
-msgstr "代理协议版本：v1 或 v2"
+msgid "Custom Domains"
+msgstr "自定义域名"
 
-msgid "Secret Key"
-msgstr "密钥"
+msgid "Comma-separated list of custom domains"
+msgstr "自定义域名列表，用逗号分隔"
 
-msgid "Secret key for STCP/XTCP visitors"
-msgstr "STCP/XTCP 访问者使用的密钥"
+msgid "Subdomain"
+msgstr "子域名"
 
-msgid "Role"
-msgstr "角色"
+msgid "Subdomain for proxy"
+msgstr "代理使用的子域名"
 
-msgid "Role: server or visitor"
-msgstr "角色：server 或 visitor"
+msgid "Plugin"
+msgstr "插件"
 
-msgid "Server Name"
-msgstr "服务器名称（SNI）"
+msgid "None"
+msgstr "无"
 
-msgid "Server Name for STCP/XTCP visitor to connect to"
-msgstr "STCP/XTCP 访问者连接的服务器名称"
+msgid "Plugin User"
+msgstr "插件用户名"
+
+msgid "Plugin Password"
+msgstr "插件密码"
 
 msgid "Local Path"
 msgstr "本地路径"
@@ -113,7 +206,7 @@ msgid "Strip Prefix"
 msgstr "去除前缀"
 
 msgid "Strip prefix for static_file plugin"
-msgstr "static_file 插件去除的路径前缀"
+msgstr "static_file 插件去除的 URL 前缀"
 
 msgid "Plugin HTTP User"
 msgstr "插件 HTTP 用户名"
@@ -137,133 +230,176 @@ msgid "SNI Rewrite"
 msgstr "SNI 重写"
 
 msgid "SNI rewrite for sni proxy"
-msgstr "SNI 代理的 SNI 重写"
+msgstr "sni 代理的 SNI 重写"
 
-msgid "Enable encryption for this proxy (true/false)"
-msgstr "为此代理启用加密（true/false）"
+# === HTTP Settings ===
 
-msgid "Enable compression for this proxy (true/false)"
-msgstr "为此代理启用压缩（true/false）"
+msgid "HTTP Basic Auth User"
+msgstr "HTTP 基础认证用户名"
 
-msgid "Bandwidth limit, e.g. 100KB or 1MB"
-msgstr "带宽限制，例如 100KB 或 1MB"
+msgid "Username for HTTP basic authentication"
+msgstr "HTTP 基础认证的用户名"
 
-msgid "client or server"
-msgstr "client 或 server"
+msgid "HTTP Basic Auth Password"
+msgstr "HTTP 基础认证密码"
 
-msgid "Number of connections to keep in connection pool"
-msgstr "连接池中保持的连接数"
+msgid "Password for HTTP basic authentication"
+msgstr "HTTP 基础认证的密码"
+
+msgid "Host Header Rewrite"
+msgstr "Host 头重写"
+
+msgid "Rewrite the HTTP Host header to this value"
+msgstr "将 HTTP Host 头重写为此值"
+
+msgid "Locations"
+msgstr "URL 路径"
+
+msgid "URL routing paths separated by | (e.g. /api|/static)"
+msgstr "URL 路由路径，用 | 分隔（如 /api|/static）"
+
+msgid "Request Headers"
+msgstr "请求头"
+
+msgid "Custom request headers separated by | (e.g. X-Custom:val1|Authorization:Bearer token)"
+msgstr "自定义请求头，用 | 分隔（如 X-Custom:val1|Authorization:Bearer token）"
+
+msgid "Response Headers"
+msgstr "响应头"
+
+msgid "Custom response headers separated by | (e.g. X-Response:val1|X-Request-Id:abc)"
+msgstr "自定义响应头，用 | 分隔（如 X-Response:val1|X-Request-Id:abc）"
+
+msgid "Route by HTTP User"
+msgstr "按 HTTP 用户路由"
+
+msgid "Route requests to different proxies based on HTTP Basic Auth user"
+msgstr "根据 HTTP 基础认证用户名将请求路由到不同代理"
+
+msgid "Multiplexer"
+msgstr "多路复用器"
+
+msgid "HTTP connect multiplexer type"
+msgstr "HTTP 连接多路复用器类型"
+
+# === STCP/XTCP/SUDP ===
+
+msgid "Role"
+msgstr "角色"
+
+msgid "Role: server (provides service) or visitor (accesses service)"
+msgstr "角色：server（提供服务）或 visitor（访问服务）"
+
+msgid "Secret Key"
+msgstr "密钥"
+
+msgid "Secret key for STCP/XTCP/SUDP visitors"
+msgstr "STCP/XTCP/SUDP 访客使用的密钥"
+
+msgid "Server Name"
+msgstr "服务名称"
+
+msgid "Server name for visitor to connect to (the name of the server-side proxy)"
+msgstr "访客连接的服务名称（即服务端代理的名称）"
+
+msgid "Allow Users"
+msgstr "允许的用户"
+
+msgid "Comma-separated list of users allowed to connect (empty = all users)"
+msgstr "允许连接的用户列表，用逗号分隔（留空表示所有用户）"
+
+# === Health Check ===
+
+msgid "Health Check Type"
+msgstr "健康检查类型"
 
 msgid "Health check type: tcp or http"
 msgstr "健康检查类型：tcp 或 http"
 
-msgid "Username for HTTP basic authentication"
-msgstr "HTTP 基本认证用户名"
+msgid "Health Check Timeout (s)"
+msgstr "健康检查超时（秒）"
 
-msgid "Password for HTTP basic authentication"
-msgstr "HTTP 基本认证密码"
+msgid "Timeout for each health check request"
+msgstr "每次健康检查请求的超时时间"
 
-msgid "Not Running"
-msgstr "未运行"
+msgid "Max Failures"
+msgstr "最大失败次数"
 
-msgid "None"
-msgstr "无"
+msgid "Number of consecutive failures before marking as unavailable"
+msgstr "连续失败多少次后标记为不可用"
 
-msgid "Parse Error"
-msgstr "解析错误"
+msgid "Check Interval (s)"
+msgstr "检查间隔（秒）"
 
-msgid "Plugin"
-msgstr "插件"
+msgid "Interval between health checks"
+msgstr "健康检查之间的间隔时间"
 
-msgid "Plugin Password"
-msgstr "插件密码"
+msgid "Health Check Path"
+msgstr "健康检查路径"
 
-msgid "Plugin User"
-msgstr "插件用户名"
+msgid "HTTP path for health check (HTTP type only, e.g. /healthz)"
+msgstr "HTTP 健康检查路径（仅 HTTP 类型，如 /healthz）"
 
-msgid "Password for authentication with the frps server. Must match the token configured on frps."
-msgstr "frps 服务器的认证令牌，必须与 frps 上配置的 token 一致。"
+msgid "Health Check Headers"
+msgstr "健康检查请求头"
 
-msgid "Port of the frps server"
-msgstr "frps 服务器端口"
+msgid "Custom HTTP headers separated by | (e.g. Authorization:Basic xxx|X-Token:abc)"
+msgstr "自定义 HTTP 请求头，用 | 分隔（如 Authorization:Basic xxx|X-Token:abc）"
 
-msgid "Proxy List"
-msgstr "代理列表"
+# === Advanced Settings ===
 
-msgid "Add proxy rules to expose local services through the frp server."
-msgstr "添加代理规则以通过 frp 服务器暴露本地服务。"
+msgid "Encryption"
+msgstr "加密"
 
-msgid "Proxy Name"
-msgstr "代理名称"
+msgid "Enable encryption for this proxy"
+msgstr "为此代理启用加密"
 
-msgid "Remote Port"
-msgstr "远程端口"
+msgid "Compression"
+msgstr "压缩"
 
-msgid "Port on the frps server to expose"
-msgstr "frps 服务器上暴露的端口"
+msgid "Enable compression for this proxy"
+msgstr "为此代理启用压缩"
 
-msgid "Request Failed"
-msgstr "请求失败"
+msgid "Bandwidth Limit"
+msgstr "带宽限制"
+
+msgid "Bandwidth limit, e.g. 100KB or 1MB"
+msgstr "带宽限制，如 100KB 或 1MB"
+
+msgid "Bandwidth Limit Mode"
+msgstr "带宽限制模式"
+
+msgid "Transport Type"
+msgstr "传输类型"
+
+msgid "Transport type: tcp or websocket"
+msgstr "传输类型：tcp 或 websocket"
+
+msgid "Proxy Protocol Version"
+msgstr "代理协议版本"
+
+msgid "Proxy protocol version: v1 or v2"
+msgstr "代理协议版本：v1 或 v2"
+
+msgid "Custom metadata separated by | (e.g. Key1:Value1|Key2:Value2)"
+msgstr "自定义元数据，用 | 分隔（如 Key1:Value1|Key2:Value2）"
+
+# === Status ===
 
 msgid "Running"
 msgstr "运行中"
 
-msgid "Running Status"
-msgstr "运行状态"
+msgid "Not Running"
+msgstr "未运行"
 
-msgid "Server Address"
-msgstr "服务器地址"
-
-msgid "IP address or hostname of the frps server"
-msgstr "frps 服务器的 IP 地址或主机名"
-
-msgid "Server Port"
-msgstr "服务器端口"
-
-msgid "Server name for TLS SNI. Leave empty to use server address."
-msgstr "TLS SNI 的服务器名称，留空则使用服务器地址。"
-
-msgid "Server Settings"
-msgstr "服务器设置"
-
-msgid "Settings"
-msgstr "基本设置"
-
-msgid "Subdomain"
-msgstr "子域名"
-
-msgid "Subdomain for HTTP/HTTPS proxy"
-msgstr "HTTP/HTTPS 代理的子域名"
-
-msgid "TLS Server Name"
-msgstr "TLS 服务器名称"
-
-msgid "Authentication Token"
-msgstr "认证令牌"
-
-msgid "Type"
-msgstr "类型"
+msgid "PID"
+msgstr "进程号"
 
 msgid "Version"
 msgstr "版本"
 
-msgid "Local IP"
-msgstr "本地 IP"
+msgid "Config Generated"
+msgstr "配置生成时间"
 
-msgid "Local Port"
-msgstr "本地端口"
-
-msgid "Local service IP address"
-msgstr "本地服务 IP 地址"
-
-msgid "Local service port"
-msgstr "本地服务端口"
-
-msgid "frpc - Client Settings"
-msgstr "frpc - 客户端设置"
-
-msgid "Advanced Settings"
-msgstr "高级设置"
-
-msgid "Basic Settings"
-msgstr "基本设置"
+msgid "never"
+msgstr "从未"
