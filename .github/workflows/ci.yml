@@ -31,7 +31,7 @@ jobs:
           echo "=== Checking shell scripts ==="
           find . -name "*.sh" -type f | while read f; do
             echo "Checking: $f"
-            bash -n "$f" && echo "  ✅ Syntax OK" || echo "  ❌ Syntax error"
+            bash -n "$f" && echo "  ? Syntax OK" || echo "  ? Syntax error"
           done
 
       - name: Validate Makefile
@@ -41,15 +41,15 @@ jobs:
             # Check required variables
             for var in PKG_NAME PKG_VERSION PKG_RELEASE; do
               if grep -q "^${var}:" Makefile; then
-                echo "✅ $var found"
+                echo "? $var found"
               else
-                echo "❌ $var missing"
+                echo "? $var missing"
                 exit 1
               fi
             done
-            echo "✅ Makefile validation passed"
+            echo "? Makefile validation passed"
           else
-            echo "❌ Makefile not found"
+            echo "? Makefile not found"
             exit 1
           fi
 
@@ -61,6 +61,8 @@ jobs:
             "luasrc/controller/frpc.lua"
             "luasrc/model/cbi/frpc-client.lua"
             "luasrc/model/cbi/frpc-proxy.lua"
+            "luasrc/model/cbi/frpc-visitor.lua"
+            "luasrc/model/cbi/frpc-visitors.lua"
             "luasrc/view/frpc/status_display.htm"
             "po/zh-cn/frpc.po"
             "root/etc/config/frpc"
@@ -69,10 +71,10 @@ jobs:
           )
           for f in "${REQUIRED_FILES[@]}"; do
             if [ -f "$f" ]; then
-              echo "✅ $f"
+              echo "? $f"
             else
-              echo "❌ $f missing"
+              echo "? $f missing"
               exit 1
             fi
           done
-          echo "✅ All required files present"
+          echo "? All required files present"

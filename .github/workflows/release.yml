@@ -1,0 +1,248 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      openwrt_version:
+        description: 'OpenWrt version to build against'
+        required: false
+        default: '24.10.0'
+
+env:
+  OPENWRT_VERSION: ${{ github.event.inputs.openwrt_version || '24.10.0' }}
+  PACKAGE_NAME: luci-app-frpc-new
+
+jobs:
+  build:
+    name: Build ${{ matrix.target.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - name: x86_64
+            sdk_url: "https://downloads.openwrt.org/releases/${{ github.event.inputs.openwrt_version || '24.10.0' }}/targets/x86/64/openwrt-sdk-${{ github.event.inputs.openwrt_version || '24.10.0' }}-x86-64_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
+            arch: x86_64
+          - name: aarch64_generic
+            sdk_url: "https://downloads.openwrt.org/releases/${{ github.event.inputs.openwrt_version || '24.10.0' }}/targets/armsr/armv8/openwrt-sdk-${{ github.event.inputs.openwrt_version || '24.10.0' }}-armsr-armv8_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
+            arch: aarch64_generic
+          - name: mipsel_24kc
+            sdk_url: "https://downloads.openwrt.org/releases/${{ github.event.inputs.openwrt_version || '24.10.0' }}/targets/ramips/mt7621/openwrt-sdk-${{ github.event.inputs.openwrt_version || '24.10.0' }}-ramips-mt7621_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
+            arch: mipsel_24kc
+          - name: arm_cortex-a7_neon-vfpv4
+            sdk_url: "https://downloads.openwrt.org/releases/${{ github.event.inputs.openwrt_version || '24.10.0' }}/targets/bcm27xx/bcm2709/openwrt-sdk-${{ github.event.inputs.openwrt_version || '24.10.0' }}-bcm2709-bcm2709_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
+            arch: arm_cortex-a7_neon-vfpv4
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ccache ecj fastjar file g++ gawk \
+            gettext git java-propose-class-path libelf-dev libncurses5-dev libncursesw5-dev \
+            libssl-dev python3 python3-dev python3-distutils python3-setuptools rsync \
+            subversion swig unzip wget zstd
+
+      - name: Download OpenWrt SDK
+        run: |
+          echo "Downloading SDK for ${{ matrix.target.name }}..."
+          mkdir -p sdk
+          wget -q --tries=3 -O sdk.tar.zst "${{ matrix.target.sdk_url }}" || {
+            echo "Primary SDK URL failed, trying fallback..."
+            # Fallback: use a known working SDK URL pattern
+            FALLBACK_URL="https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/x86/64/openwrt-sdk-${OPENWRT_VERSION}-x86-64_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
+            wget -q --tries=3 -O sdk.tar.zst "$FALLBACK_URL"
+          }
+          echo "Extracting SDK..."
+          tar --use-compress-program=unzstd -xf sdk.tar.zst -C sdk --strip-components=1
+          rm -f sdk.tar.zst
+
+      - name: Setup SDK
+        working-directory: sdk
+        run: |
+          # Update feeds
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+          # Create package directory and link our package
+          mkdir -p package/${PACKAGE_NAME}
+          cp -r $GITHUB_WORKSPACE/* package/${PACKAGE_NAME}/
+
+          # Configure minimal build
+          cat > .config << 'EOF'
+          CONFIG_TARGET_$(echo "${{ matrix.target.arch }}" | cut -d_ -f1)=y
+          CONFIG_PACKAGE_luci=y
+          CONFIG_PACKAGE_luci-base=y
+          CONFIG_PACKAGE_luci-compat=y
+          EOF
+
+          make defconfig
+
+      - name: Build package
+        working-directory: sdk
+        run: |
+          echo "Building ${PACKAGE_NAME} for ${{ matrix.target.name }}..."
+          make package/${PACKAGE_NAME}/compile V=s -j$(nproc) || {
+            echo "Build failed with parallel, retrying single-threaded..."
+            make package/${PACKAGE_NAME}/compile V=s -j1
+          }
+          echo "Build completed successfully"
+
+      - name: Find built packages
+        id: find-packages
+        working-directory: sdk
+        run: |
+          echo "=== Searching for built packages ==="
+          find bin/ -name "*.ipk" -path "*${PACKAGE_NAME}*" | head -20
+
+          # Copy packages to output directory
+          mkdir -p $GITHUB_WORKSPACE/output
+          find bin/ -name "*.ipk" -path "*${PACKAGE_NAME}*" -exec cp {} $GITHUB_WORKSPACE/output/ \;
+
+          # List output
+          echo "=== Output packages ==="
+          ls -la $GITHUB_WORKSPACE/output/
+
+          # Set output variables
+          PACKAGE_FILE=$(ls $GITHUB_WORKSPACE/output/*.ipk 2>/dev/null | head -1)
+          if [ -n "$PACKAGE_FILE" ]; then
+            echo "package_file=$(basename $PACKAGE_FILE)" >> $GITHUB_OUTPUT
+            echo "package_path=$PACKAGE_FILE" >> $GITHUB_OUTPUT
+            echo "? Package built: $(basename $PACKAGE_FILE)"
+          else
+            echo "? No package found"
+            exit 1
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_NAME }}-${{ matrix.target.name }}
+          path: output/*.ipk
+          retention-days: 30
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release
+          echo "=== Downloaded artifacts ==="
+          find artifacts/ -name "*.ipk" -type f
+
+          # Copy all ipk files to release directory
+          find artifacts/ -name "*.ipk" -type f -exec cp {} release/ \;
+
+          # Rename files for clarity
+          cd release
+          for f in *.ipk; do
+            if [ -f "$f" ]; then
+              # Extract architecture from filename or use generic name
+              echo "Package: $f ($(stat -c%s "$f") bytes)"
+            fi
+          done
+
+          # Generate checksums
+          sha256sum *.ipk > SHA256SUMS.txt 2>/dev/null || true
+
+          echo "=== Release files ==="
+          ls -la
+
+      - name: Get version info
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # Generate release notes
+          cat > release_notes.md << EOF
+          # ${PACKAGE_NAME} ${VERSION}
+
+          LuCI Web Interface for frpc client - Compatible with frp v0.70.1+
+
+          ## Installation
+
+          ### Method 1: LuCI Web Interface (Recommended)
+          1. Download the \`.ipk\` file for your router's architecture
+          2. Go to **System ? Software ? Upload Package**
+          3. Upload the downloaded \`.ipk\` file
+          4. Click **Install**
+
+          ### Method 2: Command Line
+          \`\`\`bash
+          # Download and install (replace <arch> with your architecture)
+          opkg install ${PACKAGE_NAME}-${VERSION}-*.ipk
+          \`\`\`
+
+          ### Method 3: Manual Upload via SCP
+          \`\`\`bash
+          # Copy to router
+          scp ${PACKAGE_NAME}-*.ipk root@192.168.1.1:/tmp/
+
+          # SSH to router and install
+          ssh root@192.168.1.1
+          opkg install /tmp/${PACKAGE_NAME}-*.ipk
+          \`\`\`
+
+          ## Architecture Guide
+
+          | Architecture | Common Devices |
+          |-------------|----------------|
+          | x86_64 | Virtual machines, x86 routers, soft routers |
+          | aarch64_generic | Raspberry Pi 4/5, ARM64 routers |
+          | mipsel_24kc | MediaTek MT7621 routers (e.g., WR1200JS, Newifi) |
+          | arm_cortex-a7 | Raspberry Pi 2/3, ARMv7 routers |
+
+          ## Dependencies
+
+          - OpenWrt 23.05+ or 24.10+
+          - \`frpc\` package (the frp client binary)
+          - LuCI web interface
+
+          ## What's New in ${VERSION}
+
+          - Complete frp v0.70.1 configuration support
+          - STCP/XTCP/SUDP Visitor management
+          - 8 proxy types + 10 plugins
+          - OIDC authentication, Wire Protocol v2
+          - VirtualNet, Feature Gates, Config Includes
+          - Full Chinese translation
+
+          ## Configuration
+
+          After installation, access via: **Services ? frpc**
+
+          For frp documentation: https://github.com/gofrp/frp
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "${{ env.PACKAGE_NAME }} ${{ steps.version.outputs.version }}"
+          body_path: release_notes.md
+          files: |
+            release/*.ipk
+            release/SHA256SUMS.txt
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
