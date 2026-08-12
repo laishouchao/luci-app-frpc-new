@@ -129,10 +129,6 @@ o:value("http_proxy", "http_proxy")
 o:value("static_file", "static_file")
 o:value("unix_domain_socket", "unix_domain_socket")
 o:value("http2socks", "http2socks")
-o:value("http2https", "http2https")
-o:value("https2http", "https2http")
-o:value("https2https", "https2https")
-o:value("tls2raw", "tls2raw")
 o:value("sni", "sni")
 o.rmempty = true
 
@@ -178,43 +174,6 @@ o = s:taboption("basic", Value, "sni_rewrite", translate("SNI Rewrite"),
 	translate("SNI rewrite for sni proxy"))
 o.rmempty = true
 o:depends("plugin_type", "sni")
-
--- http2https / https2http / https2https shared fields
-o = s:taboption("basic", Value, "plugin_local_addr", translate("Plugin Local Address"),
-	translate("Local address for protocol conversion plugin (e.g. 127.0.0.1:443)"))
-o.rmempty = true
-o:depends("plugin_type", "http2https")
-o:depends("plugin_type", "https2http")
-o:depends("plugin_type", "https2https")
-o:depends("plugin_type", "tls2raw")
-
-o = s:taboption("basic", Value, "plugin_host_header_rewrite", translate("Plugin Host Rewrite"),
-	translate("Rewrite Host header for protocol conversion plugin"))
-o.rmempty = true
-o:depends("plugin_type", "http2https")
-o:depends("plugin_type", "https2http")
-o:depends("plugin_type", "https2https")
-
-o = s:taboption("basic", Flag, "plugin_enable_http2", translate("Enable HTTP/2"),
-	translate("Enable HTTP/2 for HTTPS plugin"))
-o.default = "1"
-o.rmempty = false
-o:depends("plugin_type", "https2http")
-o:depends("plugin_type", "https2https")
-
-o = s:taboption("basic", Value, "plugin_crt_path", translate("TLS Certificate"),
-	translate("TLS certificate file path for plugin"))
-o.rmempty = true
-o:depends("plugin_type", "https2http")
-o:depends("plugin_type", "https2https")
-o:depends("plugin_type", "tls2raw")
-
-o = s:taboption("basic", Value, "plugin_key_path", translate("TLS Key"),
-	translate("TLS key file path for plugin"))
-o.rmempty = true
-o:depends("plugin_type", "https2http")
-o:depends("plugin_type", "https2https")
-o:depends("plugin_type", "tls2raw")
 
 -- === HTTP Settings Tab ===
 -- Applies to: http, https, tcpmux
@@ -392,27 +351,6 @@ o = s:taboption("advanced", Value, "metadatas", translate("Metadatas"),
 	translate("Custom metadata separated by | (e.g. Key1:Value1|Key2:Value2)"))
 o.rmempty = true
 o.placeholder = "Key1:Value1|Key2:Value2"
-
-o = s:taboption("advanced", Value, "annotations", translate("Annotations"),
-	translate("Proxy annotations separated by | (e.g. Key1:Value1|Key2:Value2)"))
-o.rmempty = true
-o.placeholder = "Key1:Value1|Key2:Value2"
-
--- Load Balancer
-o = s:taboption("advanced", Value, "load_balance_group", translate("Load Balance Group"),
-	translate("Load balancing group name (requests are round-robin within the group)"))
-o.rmempty = true
-
-o = s:taboption("advanced", Value, "load_balance_group_key", translate("Load Balance Group Key"),
-	translate("Group key for load balancing authentication"))
-o.rmempty = true
-
--- NAT Traversal for XTCP
-o = s:taboption("advanced", Flag, "nat_disable_assisted_addrs", translate("Disable Assisted Addrs"),
-	translate("Only use STUN-discovered public addresses for NAT traversal (ignore local interfaces)"))
-o.default = "0"
-o.rmempty = false
-o:depends("type", "xtcp")
 
 m.on_after_commit = function(self)
 	luci.util.exec("/etc/init.d/frpc restart >/dev/null 2>&1 &")
