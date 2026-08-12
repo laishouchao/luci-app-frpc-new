@@ -1,0 +1,16 @@
+config frpc 'main'
+	option enabled '0'
+	option server_addr ''
+	option server_port '7000'
+	option token ''
+	option tls '1'
+	option server_name ''
+
+config proxy
+	option name 'socks5'
+	option type 'tcp'
+	option remote_port '6005'
+	option plugin_type 'socks5'
+	option plugin_user 'admin'
+	option plugin_pass ''
+	option enabled '1'

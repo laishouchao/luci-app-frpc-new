@@ -1,0 +1,49 @@
+<%+cbi/valueheader%>
+<span id="frpc-status-<%=self.option%>">
+	<em><%:Collecting...%></em>
+</span>
+<script type="text/javascript">//<![CDATA[
+(function() {
+	var statusEl = document.getElementById('frpc-status-<%=self.option%>');
+	var url = '<%=luci.dispatcher.build_url("admin", "services", "frpc", "client", "status")%>';
+
+	function updateStatus() {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', url, true);
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200) {
+					try {
+						var data = JSON.parse(xhr.responseText);
+						var html = '';
+						if (data.running) {
+							html += '<span style="color:green;font-weight:bold"><%:Running%></span>';
+							if (data.pid) {
+								html += ' (PID: ' + data.pid + ')';
+							}
+						} else {
+							html += '<span style="color:red;font-weight:bold"><%:Not Running%></span>';
+						}
+						if (data.version) {
+							html += '<br/><small><%:Version%>: ' + data.version + '</small>';
+						}
+						if (data.config_generated) {
+							html += '<br/><small><%:Config Generated%>: ' + data.config_generated + '</small>';
+						}
+						statusEl.innerHTML = html;
+					} catch(e) {
+						statusEl.innerHTML = '<span style="color:gray"><%:Parse Error%></span>';
+					}
+				} else {
+					statusEl.innerHTML = '<span style="color:gray"><%:Request Failed%></span>';
+				}
+			}
+		};
+		xhr.send(null);
+	}
+
+	updateStatus();
+	setInterval(updateStatus, 5000);
+})();
+//]]></script>
+<%+cbi/valuefooter%>

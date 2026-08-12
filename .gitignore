@@ -1,0 +1,23 @@
+# OpenWrt build artifacts
+*.ipk
+*.opk
+*.bin
+*.img
+
+# Compiled translations
+*.lmo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Logs
+*.log

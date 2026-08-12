@@ -1,0 +1,148 @@
+#!/bin/sh /etc/rc.common
+# frpc init script for OpenWrt (procd-based)
+# Reads UCI config from /etc/config/frpc and generates /etc/frp/frpc.toml
+
+START=99
+STOP=10
+
+USE_PROCD=1
+
+PROG=/usr/bin/frpc
+CONF_DIR=/etc/frp
+TOML_CONF="${CONF_DIR}/frpc.toml"
+UCI_CONF=/etc/config/frpc
+GEN_SCRIPT=/usr/lib/frpc/generate_toml.sh
+PID_FILE=/var/run/frpc.pid
+TOML_HASH_FILE=/var/run/frpc.toml.md5
+
+mkdir -p "${CONF_DIR}"
+
+_get_config_hash() {
+	if [ -f "${UCI_CONF}" ]; then
+		md5sum "${UCI_CONF}" 2>/dev/null | awk '{print $1}'
+	else
+		echo ""
+	fi
+}
+
+_get_toml_hash() {
+	if [ -f "${TOML_CONF}" ]; then
+		md5sum "${TOML_CONF}" 2>/dev/null | awk '{print $1}'
+	else
+		echo ""
+	fi
+}
+
+_maybe_generate_toml() {
+	local uci_hash=$(_get_config_hash)
+	local last_hash=""
+
+	if [ -f "${TOML_HASH_FILE}" ]; then
+		last_hash=$(cat "${TOML_HASH_FILE}" 2>/dev/null)
+	fi
+
+	if [ "${uci_hash}" != "${last_hash}" ]; then
+		echo "frpc: UCI config changed, regenerating TOML config..."
+		_generate_toml
+		echo "${uci_hash}" > "${TOML_HASH_FILE}"
+	fi
+}
+
+_generate_toml() {
+	if [ -x "${GEN_SCRIPT}" ]; then
+		"${GEN_SCRIPT}"
+	else
+		echo "frpc: ERROR: TOML generator not found at ${GEN_SCRIPT}"
+		return 1
+	fi
+}
+
+start_service() {
+	local enabled
+
+	# Check if frpc binary exists
+	if [ ! -x "${PROG}" ]; then
+		echo "frpc: ERROR: frpc binary not found at ${PROG}"
+		return 1
+	fi
+
+	# Check if enabled in UCI
+	enabled=$(uci -q get frpc.main.enabled)
+	if [ "${enabled}" != "1" ]; then
+		echo "frpc: service is disabled in config"
+		return 0
+	fi
+
+	# Generate TOML if needed
+	_maybe_generate_toml
+
+	# Validate TOML exists
+	if [ ! -f "${TOML_CONF}" ]; then
+		echo "frpc: ERROR: TOML config not found at ${TOML_CONF}"
+		return 1
+	fi
+
+	# Validate frpc config
+	${PROG} verify -c "${TOML_CONF}" >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		echo "frpc: WARNING: TOML config validation failed, attempting to start anyway"
+	fi
+
+	echo "frpc: starting service..."
+
+	procd_open_instance
+	procd_set_param command "${PROG}" -c "${TOML_CONF}"
+	procd_set_param respawn 3600 5 5
+	procd_set_param stdout 1
+	procd_set_param stderr 1
+	procd_set_param pidfile "${PID_FILE}"
+	procd_close_instance
+}
+
+stop_service() {
+	echo "frpc: stopping service..."
+}
+
+service_triggers() {
+	procd_add_reload_trigger "frpc"
+}
+
+reload_service() {
+	stop
+	_generate_toml
+	start
+}
+
+restart() {
+	stop
+	sleep 1
+	_generate_toml
+	start
+}
+
+status_service() {
+	local pid
+	local running=0
+
+	# Check pidfile first
+	if [ -f "${PID_FILE}" ]; then
+		pid=$(cat "${PID_FILE}" 2>/dev/null)
+		if [ -n "${pid}" ] && [ -d "/proc/${pid}" ]; then
+			running=1
+		fi
+	fi
+
+	# Fallback check via pidof
+	if [ "${running}" = "0" ]; then
+		pid=$(pidof frpc 2>/dev/null)
+		if [ -n "${pid}" ]; then
+			running=1
+		fi
+	fi
+
+	if [ "${running}" = "1" ]; then
+		echo "running (pid ${pid})"
+	else
+		echo "stopped"
+	fi
+}
