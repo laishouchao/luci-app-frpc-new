@@ -352,6 +352,27 @@ o = s:taboption("advanced", Value, "metadatas", translate("Metadatas"),
 o.rmempty = true
 o.placeholder = "Key1:Value1|Key2:Value2"
 
+o = s:taboption("advanced", Value, "annotations", translate("Annotations"),
+	translate("Proxy annotations separated by | (e.g. Key1:Value1|Key2:Value2)"))
+o.rmempty = true
+o.placeholder = "Key1:Value1|Key2:Value2"
+
+-- Load Balancer
+o = s:taboption("advanced", Value, "load_balance_group", translate("Load Balance Group"),
+	translate("Load balancing group name (requests are round-robin within the group)"))
+o.rmempty = true
+
+o = s:taboption("advanced", Value, "load_balance_group_key", translate("Load Balance Group Key"),
+	translate("Group key for load balancing authentication"))
+o.rmempty = true
+
+-- NAT Traversal for XTCP
+o = s:taboption("advanced", Flag, "nat_disable_assisted_addrs", translate("Disable Assisted Addrs"),
+	translate("Only use STUN-discovered public addresses for NAT traversal (ignore local interfaces)"))
+o.default = "0"
+o.rmempty = false
+o:depends("type", "xtcp")
+
 m.on_after_commit = function(self)
 	luci.util.exec("/etc/init.d/frpc restart >/dev/null 2>&1 &")
 end

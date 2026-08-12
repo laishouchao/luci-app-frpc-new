@@ -89,21 +89,30 @@ emit_array() {
 # ---- client common ----
 
 generate_client() {
-    local server_addr tls_enable token server_port
-    local auth_type auth_token
-    local transport_protocol tcp_mux pool_count
+    local server_addr tls_enable server_port
+    local auth_type auth_token auth_token_source
+    local user client_id
+    local transport_protocol wire_protocol tcp_mux pool_count
     local heartbeat_interval heartbeat_timeout
     local log_level log_max_days
     local dns_server login_fail_exit metadatas
+    local nat_hole_stun_server udp_packet_size store_path
+    local oidc_client_id oidc_client_secret oidc_audience oidc_scope
+    local oidc_token_endpoint_url oidc_trusted_ca_file
+    local oidc_insecure_skip_verify oidc_proxy_url
 
     server_addr=$(uci_get server_addr "")
     tls_enable=$(uci_get tls "0")
-    token=$(uci_get auth_token "")
     server_port=$(uci_get server_port 7000)
     auth_type=$(uci_get auth_type "token")
+    auth_token=$(uci_get auth_token "")
+    auth_token_source=$(uci_get auth_token_source "")
+    user=$(uci_get user "")
+    client_id=$(uci_get client_id "")
 
     # Transport
     transport_protocol=$(uci_get transport_protocol "")
+    wire_protocol=$(uci_get wire_protocol "")
     tcp_mux=$(uci_get tcp_mux "0")
     pool_count=$(uci_get pool_count "")
     heartbeat_interval=$(uci_get heartbeat_interval "")
@@ -117,14 +126,27 @@ generate_client() {
     dns_server=$(uci_get dns_server "")
     login_fail_exit=$(uci_get login_fail_exit "1")
     metadatas=$(uci_get metadatas "")
+    nat_hole_stun_server=$(uci_get nat_hole_stun_server "")
+    udp_packet_size=$(uci_get udp_packet_size "")
+    store_path=$(uci_get store_path "")
+
+    # OIDC
+    oidc_client_id=$(uci_get oidc_client_id "")
+    oidc_client_secret=$(uci_get oidc_client_secret "")
+    oidc_audience=$(uci_get oidc_audience "")
+    oidc_scope=$(uci_get oidc_scope "")
+    oidc_token_endpoint_url=$(uci_get oidc_token_endpoint_url "")
+    oidc_trusted_ca_file=$(uci_get oidc_trusted_ca_file "")
+    oidc_insecure_skip_verify=$(uci_get oidc_insecure_skip_verify "0")
+    oidc_proxy_url=$(uci_get oidc_proxy_url "")
 
     # Validate required fields
     if [ -z "$server_addr" ]; then
         echo "Error: server_addr is required" >&2
         exit 1
     fi
-    if [ -z "$token" ]; then
-        echo "Error: auth token is required" >&2
+    if [ "$auth_type" = "token" ] && [ -z "$auth_token" ] && [ -z "$auth_token_source" ]; then
+        echo "Error: auth token or tokenSource is required" >&2
         exit 1
     fi
 
@@ -139,28 +161,65 @@ loginFailExit = $([ "$login_fail_exit" = "0" ] && echo false || echo true)
 
 EOF
 
+    # Client identification
+    [ -n "$user" ] && echo "user = \"$user\"" >> "$OUTPUT_FILE"
+    [ -n "$client_id" ] && echo "clientID = \"$client_id\"" >> "$OUTPUT_FILE"
+
     # DNS server
     [ -n "$dns_server" ] && echo "dnsServer = \"$dns_server\"" >> "$OUTPUT_FILE"
 
+    # STUN server
+    [ -n "$nat_hole_stun_server" ] && echo "natHoleStunServer = \"$nat_hole_stun_server\"" >> "$OUTPUT_FILE"
+
+    # UDP packet size
+    [ -n "$udp_packet_size" ] && echo "udpPacketSize = $udp_packet_size" >> "$OUTPUT_FILE"
+
     # Auth section
-    cat >> "$OUTPUT_FILE" <<EOF
+    if [ "$auth_type" = "token" ]; then
+        cat >> "$OUTPUT_FILE" <<EOF
 
 [auth]
-method = "$auth_type"
-token = "$token"
-
+method = "token"
 EOF
+        if [ -n "$auth_token_source" ]; then
+            cat >> "$OUTPUT_FILE" <<EOF
+[auth.tokenSource]
+type = "file"
+[auth.tokenSource.file]
+path = "$auth_token_source"
+EOF
+        else
+            echo "token = \"$auth_token\"" >> "$OUTPUT_FILE"
+        fi
+    elif [ "$auth_type" = "oidc" ]; then
+        cat >> "$OUTPUT_FILE" <<EOF
+
+[auth]
+method = "oidc"
+[auth.oidc]
+EOF
+        [ -n "$oidc_client_id" ] && echo "clientID = \"$oidc_client_id\"" >> "$OUTPUT_FILE"
+        [ -n "$oidc_client_secret" ] && echo "clientSecret = \"$oidc_client_secret\"" >> "$OUTPUT_FILE"
+        [ -n "$oidc_audience" ] && echo "audience = \"$oidc_audience\"" >> "$OUTPUT_FILE"
+        [ -n "$oidc_scope" ] && echo "scope = \"$oidc_scope\"" >> "$OUTPUT_FILE"
+        [ -n "$oidc_token_endpoint_url" ] && echo "tokenEndpointURL = \"$oidc_token_endpoint_url\"" >> "$OUTPUT_FILE"
+        [ -n "$oidc_trusted_ca_file" ] && echo "trustedCaFile = \"$oidc_trusted_ca_file\"" >> "$OUTPUT_FILE"
+        [ "$oidc_insecure_skip_verify" = "1" ] && echo "insecureSkipVerify = true" >> "$OUTPUT_FILE"
+        [ -n "$oidc_proxy_url" ] && echo "proxyURL = \"$oidc_proxy_url\"" >> "$OUTPUT_FILE"
+    fi
 
     # Transport section
     cat >> "$OUTPUT_FILE" <<EOF
+
 [transport]
 poolCount = ${pool_count:-1}
 EOF
 
-    # Protocol (tcp/kcp/quic/wss)
-    if [ -n "$transport_protocol" ]; then
-        echo "protocol = \"$transport_protocol\"" >> "$OUTPUT_FILE"
-    fi
+    # Protocol (tcp/kcp/quic/websocket/wss)
+    [ -n "$transport_protocol" ] && echo "protocol = \"$transport_protocol\"" >> "$OUTPUT_FILE"
+
+    # Wire protocol (v1/v2)
+    [ -n "$wire_protocol" ] && echo "wireProtocol = \"$wire_protocol\"" >> "$OUTPUT_FILE"
 
     # TCP mux
     [ "$tcp_mux" = "1" ] && echo "tcpMux = true" >> "$OUTPUT_FILE"
@@ -190,6 +249,13 @@ EOF
     if [ -n "$metadatas" ]; then
         emit_map "[metadatas]" "$metadatas" >> "$OUTPUT_FILE"
     fi
+
+    # Store
+    if [ -n "$store_path" ]; then
+        echo "" >> "$OUTPUT_FILE"
+        echo "[store]" >> "$OUTPUT_FILE"
+        echo "path = \"$store_path\"" >> "$OUTPUT_FILE"
+    fi
 }
 
 # ---- proxy ----
@@ -213,7 +279,9 @@ generate_proxy() {
     local plugin_http_user plugin_http_passwd
     local plugin_addr sni_rewrite
     local secret_key role server_name allow_users
-    local metadatas
+    local metadatas annotations
+    local load_balance_group load_balance_group_key
+    local nat_disable_assisted_addrs
 
     name=$(sec_get "$section" name "")
     type=$(sec_get "$section" type "tcp")
@@ -428,6 +496,28 @@ generate_proxy() {
     # Proxy metadatas
     metadatas=$(sec_get "$section" metadatas "")
     [ -n "$metadatas" ] && emit_map "[proxies.metadatas]" "$metadatas"
+
+    # Proxy annotations
+    annotations=$(sec_get "$section" annotations "")
+    [ -n "$annotations" ] && emit_map "[proxies.annotations]" "$annotations"
+
+    # Load balancer
+    load_balance_group=$(sec_get "$section" load_balance_group "")
+    load_balance_group_key=$(sec_get "$section" load_balance_group_key "")
+    if [ -n "$load_balance_group" ]; then
+        echo "[proxies.loadBalancer]"
+        emit "group" "$load_balance_group"
+        [ -n "$load_balance_group_key" ] && emit "groupKey" "$load_balance_group_key"
+    fi
+
+    # NAT traversal (XTCP only)
+    if [ "$type" = "xtcp" ]; then
+        nat_disable_assisted_addrs=$(sec_get "$section" nat_disable_assisted_addrs "0")
+        if [ "$nat_disable_assisted_addrs" = "1" ]; then
+            echo "[proxies.natTraversal]"
+            echo "disableAssistedAddrs = true"
+        fi
+    fi
 
     echo "" >> "$OUTPUT_FILE"
 }

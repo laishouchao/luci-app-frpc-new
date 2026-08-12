@@ -25,6 +25,14 @@ o.placeholder = "7000"
 o.default = "7000"
 o.rmempty = false
 
+o = s:option(Value, "user", translate("Client Username"),
+	translate("Username to identify this client (proxy names become user.proxyName)"))
+o.rmempty = true
+
+o = s:option(Value, "client_id", translate("Client ID"),
+	translate("Unique identifier for this client instance"))
+o.rmempty = true
+
 -- ================================================================
 -- Section: Authentication
 -- ================================================================
@@ -32,6 +40,7 @@ s = m:section(NamedSection, "main", "frpc", translate("Authentication"))
 
 o = s:option(ListValue, "auth_type", translate("Authentication Method"))
 o:value("token", "Token")
+o:value("oidc", "OIDC")
 o.default = "token"
 o.rmempty = false
 
@@ -39,6 +48,50 @@ o = s:option(Value, "auth_token", translate("Token"))
 o.password = true
 o.rmempty = false
 o:depends("auth_type", "token")
+
+o = s:option(Value, "auth_token_source", translate("Token File Path"),
+	translate("Load token from file (mutually exclusive with Token)"))
+o.rmempty = true
+o:depends("auth_type", "token")
+
+-- OIDC authentication fields
+o = s:option(Value, "oidc_client_id", translate("OIDC Client ID"))
+o.rmempty = true
+o:depends("auth_type", "oidc")
+
+o = s:option(Value, "oidc_client_secret", translate("OIDC Client Secret"))
+o.password = true
+o.rmempty = true
+o:depends("auth_type", "oidc")
+
+o = s:option(Value, "oidc_audience", translate("OIDC Audience"))
+o.rmempty = true
+o:depends("auth_type", "oidc")
+
+o = s:option(Value, "oidc_scope", translate("OIDC Scope"))
+o.rmempty = true
+o:depends("auth_type", "oidc")
+
+o = s:option(Value, "oidc_token_endpoint_url", translate("OIDC Token Endpoint URL"))
+o.rmempty = true
+o.datatype = "url"
+o:depends("auth_type", "oidc")
+
+o = s:option(Value, "oidc_trusted_ca_file", translate("OIDC CA File"),
+	translate("CA certificate file for verifying OIDC server TLS"))
+o.rmempty = true
+o:depends("auth_type", "oidc")
+
+o = s:option(Flag, "oidc_insecure_skip_verify", translate("OIDC Skip TLS Verify"),
+	translate("Skip TLS certificate verification for OIDC (not recommended)"))
+o.default = "0"
+o.rmempty = false
+o:depends("auth_type", "oidc")
+
+o = s:option(Value, "oidc_proxy_url", translate("OIDC Proxy URL"),
+	translate("Proxy for OIDC endpoint (e.g. http://proxy:8080)"))
+o.rmempty = true
+o:depends("auth_type", "oidc")
 
 -- ================================================================
 -- Section: Transport
@@ -50,8 +103,16 @@ o = s:option(ListValue, "transport_protocol", translate("Protocol"),
 o:value("tcp", "TCP")
 o:value("kcp", "KCP")
 o:value("quic", "QUIC")
+o:value("websocket", "WebSocket")
 o:value("wss", "WebSocket TLS (wss)")
 o.default = "tcp"
+o.rmempty = true
+
+o = s:option(ListValue, "wire_protocol", translate("Wire Protocol"),
+	translate("Internal message protocol version (v2 adds AEAD encryption)"))
+o:value("", translate("Default (v1)"))
+o:value("v1", "v1")
+o:value("v2", "v2")
 o.rmempty = true
 
 o = s:option(Flag, "tls", translate("TLS"),
@@ -114,6 +175,21 @@ o.rmempty = false
 
 o = s:option(Value, "dns_server", translate("DNS Server"),
 	translate("Custom DNS server address (e.g. 8.8.8.8)"))
+o.rmempty = true
+
+o = s:option(Value, "nat_hole_stun_server", translate("STUN Server"),
+	translate("STUN server for XTCP NAT traversal (default: stun.easyvoip.com:3478)"))
+o.rmempty = true
+o.placeholder = "stun.easyvoip.com:3478"
+
+o = s:option(Value, "udp_packet_size", translate("UDP Packet Size"),
+	translate("Max UDP packet size in bytes (default: 1500, must match server)"))
+o.datatype = "uinteger"
+o.placeholder = "1500"
+o.rmempty = true
+
+o = s:option(Value, "store_path", translate("Store Path"),
+	translate("Persistent store file path for dynamic proxy management"))
 o.rmempty = true
 
 o = s:option(Value, "metadatas", translate("Metadatas"),

@@ -2,36 +2,32 @@
 
 OpenWrt LuCI 应用 — frpc 内网穿透客户端管理界面
 
-基于 frp 官方文档 ([gofrp/frp-doc](https://github.com/gofrp/frp-doc)) 全面支持的 LuCI 管理界面，适用于 frp >= 0.52.0 TOML 配置格式。
+基于 frp 官方文档 ([gofrp/frp-doc](https://github.com/gofrp/frp-doc)) 全面支持的 LuCI 管理界面，兼容 frp v0.52.0 ~ v0.70.1+ TOML 配置格式。
 
 ## 功能特性
 
 ### 支持的代理类型
-- **TCP** — 标准 TCP 端口映射
-- **UDP** — 标准 UDP 端口映射
-- **HTTP** — 基于域名的 HTTP 反向代理
-- **HTTPS** — 基于域名的 HTTPS 反向代理
-- **TCPMux** — HTTP 连接复用代理
-- **STCP** — 安全 TCP 内网穿透（secret key + role 模型）
-- **XTCP** — 点对网穿透（P2P）
-- **SUDP** — 安全 UDP 内网穿透
+- **TCP** / **UDP** / **HTTP** / **HTTPS** / **TCPMux** / **STCP** / **XTCP** / **SUDP**
 
 ### 客户端配置
-- 服务器连接（地址、端口、Token 认证）
-- 传输协议（TCP / KCP / QUIC / WSS）
-- TLS 加密、TCP 多路复用
-- 连接池、心跳间隔与超时
-- 日志级别与保留天数
-- DNS 服务器、登录失败策略
-- 客户端元数据
+- 服务器连接（地址、端口、客户端用户名、客户端 ID）
+- 认证方式（Token / OIDC / Token 文件加载）
+- 传输协议（TCP / KCP / QUIC / WebSocket / WSS）
+- 线路协议（v1 / v2，v2 支持 AEAD 加密协商）
+- TLS 加密、TCP 多路复用、连接池
+- 心跳间隔与超时、日志级别与保留天数
+- DNS 服务器、STUN 服务器、UDP 包大小
+- 登录失败策略、持久化 Store、客户端元数据
 
 ### 代理配置
 - HTTP 高级设置：Host 头重写、URL 路径路由、自定义请求头/响应头、按用户路由、多路复用器
 - STCP/XTCP/SUDP：角色(server/visitor)、密钥、服务名称、允许用户列表
+- XTCP NAT 穿透：禁用辅助地址（仅使用 STUN 发现的公网地址）
 - 健康检查：TCP/HTTP 类型、超时、最大失败次数、间隔、路径、自定义检查头
 - 传输设置：加密、压缩、带宽限制、传输类型、代理协议版本
+- 负载均衡：分组名称、分组密钥
 - 插件支持：socks5、http_proxy、static_file、unix_domain_socket、http2socks、sni
-- 代理元数据
+- 代理元数据、代理注释
 
 ## 项目结构
 

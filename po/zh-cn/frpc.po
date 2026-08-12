@@ -29,6 +29,18 @@ msgstr "服务器地址"
 msgid "Server Port"
 msgstr "服务器端口"
 
+msgid "Client Username"
+msgstr "客户端用户名"
+
+msgid "Username to identify this client (proxy names become user.proxyName)"
+msgstr "标识此客户端的用户名（代理名称将变为 用户名.代理名）"
+
+msgid "Client ID"
+msgstr "客户端 ID"
+
+msgid "Unique identifier for this client instance"
+msgstr "此客户端实例的唯一标识符"
+
 msgid "Authentication"
 msgstr "认证"
 
@@ -38,6 +50,45 @@ msgstr "认证方式"
 msgid "Token"
 msgstr "令牌"
 
+msgid "Token File Path"
+msgstr "Token 文件路径"
+
+msgid "Load token from file (mutually exclusive with Token)"
+msgstr "从文件加载 Token（与 Token 互斥）"
+
+msgid "OIDC Client ID"
+msgstr "OIDC 客户端 ID"
+
+msgid "OIDC Client Secret"
+msgstr "OIDC 客户端密钥"
+
+msgid "OIDC Audience"
+msgstr "OIDC Audience"
+
+msgid "OIDC Scope"
+msgstr "OIDC Scope"
+
+msgid "OIDC Token Endpoint URL"
+msgstr "OIDC 令牌端点 URL"
+
+msgid "OIDC CA File"
+msgstr "OIDC CA 证书文件"
+
+msgid "CA certificate file for verifying OIDC server TLS"
+msgstr "用于验证 OIDC 服务器 TLS 的 CA 证书文件"
+
+msgid "OIDC Skip TLS Verify"
+msgstr "OIDC 跳过 TLS 验证"
+
+msgid "Skip TLS certificate verification for OIDC (not recommended)"
+msgstr "跳过 OIDC 的 TLS 证书验证（不推荐）"
+
+msgid "OIDC Proxy URL"
+msgstr "OIDC 代理 URL"
+
+msgid "Proxy for OIDC endpoint (e.g. http://proxy:8080)"
+msgstr "访问 OIDC 端点的代理地址（如 http://proxy:8080）"
+
 msgid "Transport"
 msgstr "传输设置"
 
@@ -46,6 +97,15 @@ msgstr "通信协议"
 
 msgid "Communication protocol between frpc and frps"
 msgstr "frpc 与 frps 之间的通信协议"
+
+msgid "Wire Protocol"
+msgstr "线路协议"
+
+msgid "Internal message protocol version (v2 adds AEAD encryption)"
+msgstr "内部消息协议版本（v2 增加 AEAD 加密）"
+
+msgid "Default (v1)"
+msgstr "默认（v1）"
 
 msgid "TLS"
 msgstr "TLS 加密"
@@ -106,6 +166,24 @@ msgstr "DNS 服务器"
 
 msgid "Custom DNS server address (e.g. 8.8.8.8)"
 msgstr "自定义 DNS 服务器地址（如 8.8.8.8）"
+
+msgid "STUN Server"
+msgstr "STUN 服务器"
+
+msgid "STUN server for XTCP NAT traversal (default: stun.easyvoip.com:3478)"
+msgstr "XTCP NAT 穿透使用的 STUN 服务器（默认：stun.easyvoip.com:3478）"
+
+msgid "UDP Packet Size"
+msgstr "UDP 包大小"
+
+msgid "Max UDP packet size in bytes (default: 1500, must match server)"
+msgstr "UDP 最大包大小（字节，默认 1500，需与服务端一致）"
+
+msgid "Store Path"
+msgstr "存储路径"
+
+msgid "Persistent store file path for dynamic proxy management"
+msgstr "持久化存储文件路径，用于动态代理管理"
 
 msgid "Metadatas"
 msgstr "元数据"
@@ -383,6 +461,30 @@ msgstr "代理协议版本：v1 或 v2"
 
 msgid "Custom metadata separated by | (e.g. Key1:Value1|Key2:Value2)"
 msgstr "自定义元数据，用 | 分隔（如 Key1:Value1|Key2:Value2）"
+
+msgid "Annotations"
+msgstr "注释"
+
+msgid "Proxy annotations separated by | (e.g. Key1:Value1|Key2:Value2)"
+msgstr "代理注释，用 | 分隔（如 Key1:Value1|Key2:Value2）"
+
+msgid "Load Balance Group"
+msgstr "负载均衡分组"
+
+msgid "Load balancing group name (requests are round-robin within the group)"
+msgstr "负载均衡分组名称（组内请求以轮询方式分配）"
+
+msgid "Load Balance Group Key"
+msgstr "负载均衡分组密钥"
+
+msgid "Group key for load balancing authentication"
+msgstr "负载均衡分组鉴权密钥"
+
+msgid "Disable Assisted Addrs"
+msgstr "禁用辅助地址"
+
+msgid "Only use STUN-discovered public addresses for NAT traversal (ignore local interfaces)"
+msgstr "仅使用 STUN 发现的公网地址进行 NAT 穿透（忽略本地网络接口）"
 
 # === Status ===
 
