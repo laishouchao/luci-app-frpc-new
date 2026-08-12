@@ -1,6 +1,6 @@
 -- frpc-client.lua: Main settings page for frpc client
 -- This model defines the client common configuration and the proxy list section.
--- It is the primary page under Services ? frpc ? Settings.
+-- It is the primary page under Services → frpc → Settings.
 
 local m, s, o
 
