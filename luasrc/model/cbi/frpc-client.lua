@@ -1,6 +1,6 @@
 -- frpc-client.lua: Main settings page for frpc client
 -- This model defines the client common configuration and the proxy list section.
--- It is the primary page under Services → frpc → Settings.
+-- It is the primary page under Services ? frpc ? Settings.
 
 local m, s, o
 
@@ -93,6 +93,10 @@ o = s:option(Value, "oidc_proxy_url", translate("OIDC Proxy URL"),
 o.rmempty = true
 o:depends("auth_type", "oidc")
 
+o = s:option(DynamicList, "auth_additional_scopes", translate("Additional Scopes"),
+	translate("Extra auth info scopes: HeartBeats, NewWorkConns"))
+o.rmempty = true
+
 -- ================================================================
 -- Section: Transport
 -- ================================================================
@@ -172,6 +176,12 @@ o.rmempty = true
 -- ================================================================
 s = m:section(NamedSection, "main", "frpc", translate("Log Settings"))
 
+o = s:option(ListValue, "log_to", translate("Log Output"))
+o:value("", translate("Default (console)"))
+o:value("console", "console")
+o.rmempty = true
+o.datatype = "string"
+
 o = s:option(ListValue, "log_level", translate("Log Level"))
 o:value("", translate("Default (info)"))
 o:value("trace", "trace")
@@ -186,6 +196,11 @@ o = s:option(Value, "log_max_days", translate("Log Retention (days)"),
 o.datatype = "uinteger"
 o.placeholder = "3"
 o.rmempty = true
+
+o = s:option(Flag, "log_disable_print_color", translate("Disable Log Color"),
+	translate("Disable colored output in console logs"))
+o.default = "0"
+o.rmempty = false
 
 -- ================================================================
 -- Section: TLS Advanced
@@ -262,6 +277,36 @@ o = s:option(Value, "web_server_password", translate("Password"),
 	translate("HTTP Basic Auth password for admin dashboard"))
 o.password = true
 o.rmempty = true
+
+o = s:option(Value, "web_server_assets_dir", translate("Assets Directory"),
+	translate("Custom static assets directory for dashboard"))
+o.rmempty = true
+
+o = s:option(Flag, "web_server_pprof_enable", translate("Enable pprof"),
+	translate("Enable Go HTTP pprof for debugging"))
+o.default = "0"
+o.rmempty = false
+
+-- ================================================================
+-- Section: Experimental
+-- ================================================================
+s = m:section(NamedSection, "main", "frpc", translate("Experimental"),
+	translate("Alpha and experimental features"))
+
+o = s:option(Value, "virtual_net_address", translate("VirtualNet Address"),
+	translate("Virtual network CIDR address (e.g. 100.86.0.1/24) - Alpha feature"))
+o.rmempty = true
+o.placeholder = "100.86.0.1/24"
+
+o = s:option(Value, "feature_gates", translate("Feature Gates"),
+	translate("Experimental features separated by | (e.g. VirtualNet:true)"))
+o.rmempty = true
+o.placeholder = "VirtualNet:true"
+
+o = s:option(Value, "includes", translate("Config Includes"),
+	translate("Additional config file paths separated by | (e.g. /etc/frp/proxies/|/etc/frp/extra.toml)"))
+o.rmempty = true
+o.placeholder = "/etc/frp/proxies/"
 
 -- ================================================================
 -- Section: Advanced Client Settings
