@@ -4,531 +4,531 @@ msgstr ""
 
 # === Controller / Menu ===
 msgid "frpc"
-msgstr "frpc ???????"
+msgstr "frpc 内网穿透客户端"
 
 msgid "frpc Client Settings"
-msgstr "frpc ?????"
+msgstr "frpc 客户端设置"
 
 msgid "Settings"
-msgstr "??"
+msgstr "设置"
 
 msgid "Status"
-msgstr "??"
+msgstr "状态"
 
 # === frpc-client.lua ===
 
 msgid "Configuration for the frpc client and its proxy list."
-msgstr "?? frpc ?????????????"
+msgstr "配置 frpc 客户端连接参数和代理列表。"
 
 msgid "Server Connection"
-msgstr "?????"
+msgstr "服务器连接"
 
 msgid "Server Address"
-msgstr "?????"
+msgstr "服务器地址"
 
 msgid "Server Port"
-msgstr "?????"
+msgstr "服务器端口"
 
 msgid "Authentication"
-msgstr "??"
+msgstr "认证"
 
 msgid "Authentication Method"
-msgstr "????"
+msgstr "认证方式"
 
 msgid "Token"
-msgstr "??"
+msgstr "令牌"
 
 msgid "Transport"
-msgstr "????"
+msgstr "传输设置"
 
 msgid "Protocol"
-msgstr "????"
+msgstr "通信协议"
 
 msgid "Communication protocol between frpc and frps"
-msgstr "frpc ? frps ???????"
+msgstr "frpc 与 frps 之间的通信协议"
 
 msgid "TLS"
-msgstr "TLS ??"
+msgstr "TLS 加密"
 
 msgid "Enable TLS encryption for the connection"
-msgstr "?? TLS ????"
+msgstr "启用 TLS 加密连接"
 
 msgid "TCP Mux"
-msgstr "TCP ????"
+msgstr "TCP 多路复用"
 
 msgid "Enable TCP multiplexing for connection reuse"
-msgstr "?? TCP ?????????"
+msgstr "启用 TCP 多路复用以重用连接"
 
 msgid "Connection Pool"
-msgstr "???"
+msgstr "连接池"
 
 msgid "Number of connections to keep in connection pool"
-msgstr "????????????"
+msgstr "保持在连接池中的连接数量"
 
 msgid "Heartbeat Interval"
-msgstr "????"
+msgstr "心跳间隔"
 
 msgid "Interval for sending heartbeat to server (seconds)"
-msgstr "???????????(?)"
+msgstr "向服务器发送心跳的间隔（秒）"
 
 msgid "Heartbeat Timeout"
-msgstr "????"
+msgstr "心跳超时"
 
 msgid "Timeout for heartbeat response (seconds)"
-msgstr "????????(?)"
+msgstr "心跳响应超时时间（秒）"
 
 msgid "Log Settings"
-msgstr "????"
+msgstr "日志设置"
 
 msgid "Log Level"
-msgstr "????"
+msgstr "日志级别"
 
 msgid "Default (info)"
-msgstr "??(info)"
+msgstr "默认（info）"
 
 msgid "Log Retention (days)"
-msgstr "??????"
+msgstr "日志保留天数"
 
 msgid "Maximum number of days to keep log files"
-msgstr "??????????"
+msgstr "日志文件最大保留天数"
 
 msgid "Advanced"
-msgstr "????"
+msgstr "高级设置"
 
 msgid "Exit on Login Failure"
-msgstr "???????"
+msgstr "登录失败时退出"
 
 msgid "Exit frpc when login to server fails"
-msgstr "?????????? frpc"
+msgstr "登录服务器失败时退出 frpc"
 
 msgid "DNS Server"
-msgstr "DNS ???"
+msgstr "DNS 服务器"
 
 msgid "Custom DNS server address (e.g. 8.8.8.8)"
-msgstr "??? DNS ?????(? 8.8.8.8)"
+msgstr "自定义 DNS 服务器地址（如 8.8.8.8）"
 
 msgid "Metadatas"
-msgstr "???"
+msgstr "元数据"
 
 msgid "Client metadata separated by | (e.g. Key1:Value1|Key2:Value2)"
-msgstr "??????,? | ??(? Key1:Value1|Key2:Value2)"
+msgstr "客户端元数据，用 | 分隔（如 Key1:Value1|Key2:Value2）"
 
 msgid "Proxy List"
-msgstr "????"
+msgstr "代理列表"
 
 msgid "Each proxy defines a tunnel through the frp server."
-msgstr "?????????? frp ???????"
+msgstr "每个代理定义一条通过 frp 服务器的隧道。"
 
 msgid "Enable"
-msgstr "??"
+msgstr "启用"
 
 msgid "Proxy Name"
-msgstr "????"
+msgstr "代理名称"
 
 msgid "Type"
-msgstr "??"
+msgstr "类型"
 
 msgid "Local IP"
-msgstr "?? IP"
+msgstr "本地 IP"
 
 msgid "Local Port"
-msgstr "????"
+msgstr "本地端口"
 
 msgid "Target"
-msgstr "??"
+msgstr "目标"
 
 msgid "Add Proxy"
-msgstr "????"
+msgstr "添加代理"
 
 # === frpc-proxy.lua ===
 
 msgid "Proxy Configuration"
-msgstr "????"
+msgstr "代理配置"
 
 msgid "Proxy Settings"
-msgstr "????"
+msgstr "代理设置"
 
 msgid "Basic Settings"
-msgstr "????"
+msgstr "基本设置"
 
 msgid "HTTP Settings"
-msgstr "HTTP ??"
+msgstr "HTTP 设置"
 
 msgid "Health Check"
-msgstr "????"
+msgstr "健康检查"
 
 msgid "STCP/XTCP"
 msgstr "STCP/XTCP"
 
 msgid "Local service IP address"
-msgstr "???? IP ??"
+msgstr "本地服务 IP 地址"
 
 msgid "Local service port"
-msgstr "??????"
+msgstr "本地服务端口"
 
 msgid "Remote Port"
-msgstr "????"
+msgstr "远程端口"
 
 msgid "Port on the frps server to expose"
-msgstr "? frps ?????????"
+msgstr "在 frps 服务器上暴露的端口"
 
 msgid "Custom Domains"
-msgstr "?????"
+msgstr "自定义域名"
 
 msgid "Comma-separated list of custom domains"
-msgstr "???????,?????"
+msgstr "自定义域名列表，用逗号分隔"
 
 msgid "Subdomain"
-msgstr "???"
+msgstr "子域名"
 
 msgid "Subdomain for proxy"
-msgstr "????????"
+msgstr "代理使用的子域名"
 
 msgid "Plugin"
-msgstr "??"
+msgstr "插件"
 
 msgid "None"
-msgstr "?"
+msgstr "无"
 
 msgid "Plugin User"
-msgstr "?????"
+msgstr "插件用户名"
 
 msgid "Plugin Password"
-msgstr "????"
+msgstr "插件密码"
 
 msgid "Local Path"
-msgstr "????"
+msgstr "本地路径"
 
 msgid "Local path for static_file plugin"
-msgstr "static_file ???????"
+msgstr "static_file 插件的本地路径"
 
 msgid "Strip Prefix"
-msgstr "????"
+msgstr "去除前缀"
 
 msgid "Strip prefix for static_file plugin"
-msgstr "static_file ????? URL ??"
+msgstr "static_file 插件去除的 URL 前缀"
 
 msgid "Plugin HTTP User"
-msgstr "?? HTTP ???"
+msgstr "插件 HTTP 用户名"
 
 msgid "HTTP user for static_file plugin"
-msgstr "static_file ??? HTTP ???"
+msgstr "static_file 插件的 HTTP 用户名"
 
 msgid "Plugin HTTP Password"
-msgstr "?? HTTP ??"
+msgstr "插件 HTTP 密码"
 
 msgid "HTTP password for static_file plugin"
-msgstr "static_file ??? HTTP ??"
+msgstr "static_file 插件的 HTTP 密码"
 
 msgid "Plugin Address"
-msgstr "????"
+msgstr "插件地址"
 
 msgid "Address for unix_domain_socket plugin"
-msgstr "unix_domain_socket ?????"
+msgstr "unix_domain_socket 插件的地址"
 
 msgid "SNI Rewrite"
-msgstr "SNI ??"
+msgstr "SNI 重写"
 
 msgid "SNI rewrite for sni proxy"
-msgstr "sni ??? SNI ??"
+msgstr "sni 代理的 SNI 重写"
 
 # === HTTP Settings ===
 
 msgid "HTTP Basic Auth User"
-msgstr "HTTP ???????"
+msgstr "HTTP 基础认证用户名"
 
 msgid "Username for HTTP basic authentication"
-msgstr "HTTP ????????"
+msgstr "HTTP 基础认证的用户名"
 
 msgid "HTTP Basic Auth Password"
-msgstr "HTTP ??????"
+msgstr "HTTP 基础认证密码"
 
 msgid "Password for HTTP basic authentication"
-msgstr "HTTP ???????"
+msgstr "HTTP 基础认证的密码"
 
 msgid "Host Header Rewrite"
-msgstr "Host ???"
+msgstr "Host 头重写"
 
 msgid "Rewrite the HTTP Host header to this value"
-msgstr "? HTTP Host ??????"
+msgstr "将 HTTP Host 头重写为此值"
 
 msgid "Locations"
-msgstr "URL ??"
+msgstr "URL 路径"
 
 msgid "URL routing paths separated by | (e.g. /api|/static)"
-msgstr "URL ????,? | ??(? /api|/static)"
+msgstr "URL 路由路径，用 | 分隔（如 /api|/static）"
 
 msgid "Request Headers"
-msgstr "???"
+msgstr "请求头"
 
 msgid "Custom request headers separated by | (e.g. X-Custom:val1|Authorization:Bearer token)"
-msgstr "??????,? | ??(? X-Custom:val1|Authorization:Bearer token)"
+msgstr "自定义请求头，用 | 分隔（如 X-Custom:val1|Authorization:Bearer token）"
 
 msgid "Response Headers"
-msgstr "???"
+msgstr "响应头"
 
 msgid "Custom response headers separated by | (e.g. X-Response:val1|X-Request-Id:abc)"
-msgstr "??????,? | ??(? X-Response:val1|X-Request-Id:abc)"
+msgstr "自定义响应头，用 | 分隔（如 X-Response:val1|X-Request-Id:abc）"
 
 msgid "Route by HTTP User"
-msgstr "? HTTP ????"
+msgstr "按 HTTP 用户路由"
 
 msgid "Route requests to different proxies based on HTTP Basic Auth user"
-msgstr "?? HTTP ?????????????????"
+msgstr "根据 HTTP 基础认证用户名将请求路由到不同代理"
 
 msgid "Multiplexer"
-msgstr "?????"
+msgstr "多路复用器"
 
 msgid "HTTP connect multiplexer type"
-msgstr "HTTP ?????????"
+msgstr "HTTP 连接多路复用器类型"
 
 # === STCP/XTCP/SUDP ===
 
 msgid "Role"
-msgstr "??"
+msgstr "角色"
 
 msgid "Role: server (provides service) or visitor (accesses service)"
-msgstr "??:server(????)? visitor(????)"
+msgstr "角色：server（提供服务）或 visitor（访问服务）"
 
 msgid "Secret Key"
-msgstr "??"
+msgstr "密钥"
 
 msgid "Secret key for STCP/XTCP/SUDP visitors"
-msgstr "STCP/XTCP/SUDP ???????"
+msgstr "STCP/XTCP/SUDP 访客使用的密钥"
 
 msgid "Server Name"
-msgstr "????"
+msgstr "服务名称"
 
 msgid "Server name for visitor to connect to (the name of the server-side proxy)"
-msgstr "?????????(?????????)"
+msgstr "访客连接的服务名称（即服务端代理的名称）"
 
 msgid "Allow Users"
-msgstr "?????"
+msgstr "允许的用户"
 
 msgid "Comma-separated list of users allowed to connect (empty = all users)"
-msgstr "?????????,?????(????????)"
+msgstr "允许连接的用户列表，用逗号分隔（留空表示所有用户）"
 
 # === Health Check ===
 
 msgid "Health Check Type"
-msgstr "??????"
+msgstr "健康检查类型"
 
 msgid "Health check type: tcp or http"
-msgstr "??????:tcp ? http"
+msgstr "健康检查类型：tcp 或 http"
 
 msgid "Health Check Timeout (s)"
-msgstr "??????(?)"
+msgstr "健康检查超时（秒）"
 
 msgid "Timeout for each health check request"
-msgstr "?????????????"
+msgstr "每次健康检查请求的超时时间"
 
 msgid "Max Failures"
-msgstr "??????"
+msgstr "最大失败次数"
 
 msgid "Number of consecutive failures before marking as unavailable"
-msgstr "??????????????"
+msgstr "连续失败多少次后标记为不可用"
 
 msgid "Check Interval (s)"
-msgstr "????(?)"
+msgstr "检查间隔（秒）"
 
 msgid "Interval between health checks"
-msgstr "???????????"
+msgstr "健康检查之间的间隔时间"
 
 msgid "Health Check Path"
-msgstr "??????"
+msgstr "健康检查路径"
 
 msgid "HTTP path for health check (HTTP type only, e.g. /healthz)"
-msgstr "HTTP ??????(? HTTP ??,? /healthz)"
+msgstr "HTTP 健康检查路径（仅 HTTP 类型，如 /healthz）"
 
 msgid "Health Check Headers"
-msgstr "???????"
+msgstr "健康检查请求头"
 
 msgid "Custom HTTP headers separated by | (e.g. Authorization:Basic xxx|X-Token:abc)"
-msgstr "??? HTTP ???,? | ??(? Authorization:Basic xxx|X-Token:abc)"
+msgstr "自定义 HTTP 请求头，用 | 分隔（如 Authorization:Basic xxx|X-Token:abc）"
 
 # === Advanced Settings ===
 
 msgid "Encryption"
-msgstr "??"
+msgstr "加密"
 
 msgid "Enable encryption for this proxy"
-msgstr "????????"
+msgstr "为此代理启用加密"
 
 msgid "Compression"
-msgstr "??"
+msgstr "压缩"
 
 msgid "Enable compression for this proxy"
-msgstr "????????"
+msgstr "为此代理启用压缩"
 
 msgid "Bandwidth Limit"
-msgstr "????"
+msgstr "带宽限制"
 
 msgid "Bandwidth limit, e.g. 100KB or 1MB"
-msgstr "????,? 100KB ? 1MB"
+msgstr "带宽限制，如 100KB 或 1MB"
 
 msgid "Bandwidth Limit Mode"
-msgstr "??????"
+msgstr "带宽限制模式"
 
 msgid "Transport Type"
-msgstr "????"
+msgstr "传输类型"
 
 msgid "Transport type: tcp or websocket"
-msgstr "????:tcp ? websocket"
+msgstr "传输类型：tcp 或 websocket"
 
 msgid "Proxy Protocol Version"
-msgstr "??????"
+msgstr "代理协议版本"
 
 msgid "Proxy protocol version: v1 or v2"
-msgstr "??????:v1 ? v2"
+msgstr "代理协议版本：v1 或 v2"
 
 msgid "Custom metadata separated by | (e.g. Key1:Value1|Key2:Value2)"
-msgstr "??????,? | ??(? Key1:Value1|Key2:Value2)"
+msgstr "自定义元数据，用 | 分隔（如 Key1:Value1|Key2:Value2）"
 
 # === Status ===
 
 msgid "Running"
-msgstr "???"
+msgstr "运行中"
 
 msgid "Not Running"
-msgstr "???"
+msgstr "未运行"
 
 msgid "PID"
-msgstr "???"
+msgstr "进程号"
 
 msgid "Version"
-msgstr "??"
+msgstr "版本"
 
 msgid "Config Generated"
-msgstr "??????"
+msgstr "配置生成时间"
 
 msgid "never"
-msgstr "??"
+msgstr "从未"
 
 # === Common Values ===
 
 msgid "Default"
-msgstr "??"
+msgstr "默认"
 
 msgid "Yes"
-msgstr "?"
+msgstr "是"
 
 msgid "No"
-msgstr "?"
+msgstr "否"
 
 # === Status Display ===
 
 msgid "Collecting..."
-msgstr "???..."
+msgstr "采集中..."
 
 msgid "Parse Error"
-msgstr "????"
+msgstr "解析错误"
 
 msgid "Request Failed"
-msgstr "????"
+msgstr "请求失败"
 
 # === Visitor Pages ===
 
 msgid "Visitors"
-msgstr "??"
+msgstr "访客"
 
 msgid "Visitor"
-msgstr "??"
+msgstr "访客"
 
 msgid "Visitor Settings"
-msgstr "????"
+msgstr "访客设置"
 
 msgid "Configure a visitor to connect to a server-side STCP/XTCP/SUDP proxy."
-msgstr "??????????? STCP/XTCP/SUDP ???"
+msgstr "配置访客以连接到服务端 STCP/XTCP/SUDP 代理。"
 
 msgid "Visitor List"
-msgstr "????"
+msgstr "访客列表"
 
 msgid "Manage visitors that connect to server-side STCP/XTCP/SUDP proxies."
-msgstr "???????? STCP/XTCP/SUDP ??????"
+msgstr "管理连接到服务端 STCP/XTCP/SUDP 代理的访客。"
 
 msgid "Visitor Name"
-msgstr "????"
+msgstr "访客名称"
 
 msgid "Server User"
-msgstr "?????"
+msgstr "服务端用户"
 
 msgid "The user who started the server proxy (empty = same user)"
-msgstr "??????????(????????)"
+msgstr "启动服务端代理的用户（留空表示同一用户）"
 
 msgid "Server Name"
-msgstr "?????"
+msgstr "服务端名称"
 
 msgid "Name of the server-side proxy to connect to"
-msgstr "???????????"
+msgstr "要连接的服务端代理名称"
 
 msgid "Secret Key"
-msgstr "??"
+msgstr "密钥"
 
 msgid "Must match the server proxy's secret key"
-msgstr "?????????????"
+msgstr "必须与服务端代理的密钥匹配"
 
 msgid "Bind Address"
-msgstr "????"
+msgstr "绑定地址"
 
 msgid "Local address to bind (default: 127.0.0.1)"
-msgstr "??????(??:127.0.0.1)"
+msgstr "本地绑定地址（默认：127.0.0.1）"
 
 msgid "Bind Port"
-msgstr "????"
+msgstr "绑定端口"
 
 msgid "Local port to bind for incoming connections"
-msgstr "??????,??????"
+msgstr "本地绑定端口，用于接收连接"
 
 msgid "Enable encryption for this visitor connection"
-msgstr "??????????"
+msgstr "为此访客连接启用加密"
 
 msgid "Enable compression for this visitor connection"
-msgstr "??????????"
+msgstr "为此访客连接启用压缩"
 
 msgid "Transport type for visitor connections"
-msgstr "?????????"
+msgstr "访客连接的传输类型"
 
 msgid "NAT Traversal"
-msgstr "NAT ??"
+msgstr "NAT 穿透"
 
 msgid "XTCP P2P NAT traversal settings"
-msgstr "XTCP P2P NAT ????"
+msgstr "XTCP P2P NAT 穿透设置"
 
 msgid "P2P protocol for XTCP"
-msgstr "XTCP ? P2P ??"
+msgstr "XTCP 的 P2P 协议"
 
 msgid "Keep Tunnel Open"
-msgstr "??????"
+msgstr "保持隧道连接"
 
 msgid "Keep the tunnel open even when no visitors are connected"
-msgstr "???????????????"
+msgstr "即使没有访客连接也保持隧道打开"
 
 msgid "Max Retries"
-msgstr "??????"
+msgstr "最大重试次数"
 
 msgid "Maximum number of retries for XTCP connection"
-msgstr "XTCP ?????????"
+msgstr "XTCP 连接的最大重试次数"
 
 msgid "Fallback To"
-msgstr "????"
+msgstr "回退方式"
 
 msgid "Fallback to another visitor type on failure"
-msgstr "?????????????"
+msgstr "失败时回退到另一种访客类型"
 
 msgid "Fallback Timeout (ms)"
-msgstr "????(??)"
+msgstr "回退超时（毫秒）"
 
 msgid "Timeout in milliseconds before fallback"
-msgstr "????????(??)"
+msgstr "回退前的超时时间（毫秒）"
 
 msgid "None"
-msgstr "?"
+msgstr "无"
 
 msgid "Enable"
-msgstr "??"
+msgstr "启用"
 
 msgid "Basic Settings"
-msgstr "????"
+msgstr "基本设置"
 
 msgid "Name"
-msgstr "??"
+msgstr "名称"
