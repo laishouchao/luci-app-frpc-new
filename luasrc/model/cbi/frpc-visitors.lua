@@ -1,14 +1,14 @@
 -- frpc-visitors.lua: Visitor list page
--- Displays all visitors in a table with edit/delete/add capabilities.
+-- Shows all configured visitors (STCP/XTCP/SUDP) with edit/add/remove.
 
 local m, s, o
 
-m = Map("frpc", translate("frpc Visitors"),
-	translate("Manage STCP/XTCP/SUDP visitors to connect to remote server-side proxies."))
+m = Map("frpc", translate("Visitor List"),
+	translate("Manage visitors that connect to server-side STCP/XTCP/SUDP proxies."))
 
 s = m:section(TypedSection, "visitor", translate("Visitor List"))
 s.template = "cbi/tblsection"
-s.addremove = false
+s.addremove = true
 s.anonymous = true
 s.extedit = luci.dispatcher.build_url("admin", "services", "frpc", "visitors", "visitor", "%s")
 
@@ -29,7 +29,6 @@ o.width = "15%"
 
 o = s:option(DummyValue, "type", translate("Type"))
 o.width = "10%"
-
 function o.cfgvalue(self, section)
 	local v = Value.cfgvalue(self, section)
 	if v then return string.upper(v) end
@@ -37,40 +36,27 @@ function o.cfgvalue(self, section)
 end
 
 o = s:option(DummyValue, "server_name", translate("Server Name"))
-o.width = "20%"
-
-o = s:option(DummyValue, "_server_ref", translate("Server Reference"))
-o.width = "20%"
-
-function o.cfgvalue(self, section)
-	local server_user = m:get(section, "server_user") or ""
-	local server_name = m:get(section, "server_name") or ""
-	if server_user ~= "" then
-		return server_user .. "." .. server_name
-	end
-	return server_name
-end
-
-o = s:option(DummyValue, "bind_port", translate("Bind Port"))
-o.width = "10%"
-
-o = s:option(DummyValue, "_bind_addr", translate("Bind Address"))
 o.width = "15%"
 
+o = s:option(DummyValue, "bind_addr", translate("Bind Address"))
+o.width = "15%"
 function o.cfgvalue(self, section)
-	local bind_addr = m:get(section, "bind_addr") or "127.0.0.1"
-	local bind_port = m:get(section, "bind_port") or ""
-	if bind_port ~= "" then
-		return bind_addr .. ":" .. bind_port
+	local addr = m:get(section, "bind_addr") or "127.0.0.1"
+	local port = m:get(section, "bind_port") or ""
+	if port ~= "" then
+		return addr .. ":" .. port
 	end
-	return bind_addr
+	return addr
 end
 
--- "Add" button at the bottom of the visitor list
-o = s:option(Button, "_add", translate("Add Visitor"))
-o.inputstyle = "add"
-o.write = function(self, section)
-	luci.http.redirect(luci.dispatcher.build_url("admin", "services", "frpc", "visitors", "visitor", "new"))
+o = s:option(DummyValue, "secret_key", translate("Secret Key"))
+o.width = "15%"
+function o.cfgvalue(self, section)
+	local v = m:get(section, "secret_key") or ""
+	if v ~= "" then
+		return "****"
+	end
+	return ""
 end
 
 m.on_after_commit = function(self)

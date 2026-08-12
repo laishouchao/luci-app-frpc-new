@@ -25,14 +25,6 @@ o.placeholder = "7000"
 o.default = "7000"
 o.rmempty = false
 
-o = s:option(Value, "user", translate("Client Username"),
-	translate("Username to identify this client (proxy names become user.proxyName)"))
-o.rmempty = true
-
-o = s:option(Value, "client_id", translate("Client ID"),
-	translate("Unique identifier for this client instance"))
-o.rmempty = true
-
 -- ================================================================
 -- Section: Authentication
 -- ================================================================
@@ -40,7 +32,6 @@ s = m:section(NamedSection, "main", "frpc", translate("Authentication"))
 
 o = s:option(ListValue, "auth_type", translate("Authentication Method"))
 o:value("token", "Token")
-o:value("oidc", "OIDC")
 o.default = "token"
 o.rmempty = false
 
@@ -48,54 +39,6 @@ o = s:option(Value, "auth_token", translate("Token"))
 o.password = true
 o.rmempty = false
 o:depends("auth_type", "token")
-
-o = s:option(Value, "auth_token_source", translate("Token File Path"),
-	translate("Load token from file (mutually exclusive with Token)"))
-o.rmempty = true
-o:depends("auth_type", "token")
-
--- OIDC authentication fields
-o = s:option(Value, "oidc_client_id", translate("OIDC Client ID"))
-o.rmempty = true
-o:depends("auth_type", "oidc")
-
-o = s:option(Value, "oidc_client_secret", translate("OIDC Client Secret"))
-o.password = true
-o.rmempty = true
-o:depends("auth_type", "oidc")
-
-o = s:option(Value, "oidc_audience", translate("OIDC Audience"))
-o.rmempty = true
-o:depends("auth_type", "oidc")
-
-o = s:option(Value, "oidc_scope", translate("OIDC Scope"))
-o.rmempty = true
-o:depends("auth_type", "oidc")
-
-o = s:option(Value, "oidc_token_endpoint_url", translate("OIDC Token Endpoint URL"))
-o.rmempty = true
-o.datatype = "url"
-o:depends("auth_type", "oidc")
-
-o = s:option(Value, "oidc_trusted_ca_file", translate("OIDC CA File"),
-	translate("CA certificate file for verifying OIDC server TLS"))
-o.rmempty = true
-o:depends("auth_type", "oidc")
-
-o = s:option(Flag, "oidc_insecure_skip_verify", translate("OIDC Skip TLS Verify"),
-	translate("Skip TLS certificate verification for OIDC (not recommended)"))
-o.default = "0"
-o.rmempty = false
-o:depends("auth_type", "oidc")
-
-o = s:option(Value, "oidc_proxy_url", translate("OIDC Proxy URL"),
-	translate("Proxy for OIDC endpoint (e.g. http://proxy:8080)"))
-o.rmempty = true
-o:depends("auth_type", "oidc")
-
-o = s:option(DynamicList, "auth_additional_scopes", translate("Additional Scopes"),
-	translate("Extra auth info scopes: HeartBeats, NewWorkConns"))
-o.rmempty = true
 
 -- ================================================================
 -- Section: Transport
@@ -107,21 +50,13 @@ o = s:option(ListValue, "transport_protocol", translate("Protocol"),
 o:value("tcp", "TCP")
 o:value("kcp", "KCP")
 o:value("quic", "QUIC")
-o:value("websocket", "WebSocket")
 o:value("wss", "WebSocket TLS (wss)")
 o.default = "tcp"
 o.rmempty = true
 
-o = s:option(ListValue, "wire_protocol", translate("Wire Protocol"),
-	translate("Internal message protocol version (v2 adds AEAD encryption)"))
-o:value("", translate("Default (v1)"))
-o:value("v1", "v1")
-o:value("v2", "v2")
-o.rmempty = true
-
 o = s:option(Flag, "tls", translate("TLS"),
 	translate("Enable TLS encryption for the connection"))
-o.default = "0"
+o.default = "1"
 o.rmempty = false
 
 o = s:option(Flag, "tcp_mux", translate("TCP Mux"),
@@ -147,40 +82,10 @@ o.datatype = "uinteger"
 o.placeholder = "90"
 o.rmempty = true
 
-o = s:option(Value, "dial_server_timeout", translate("Dial Server Timeout"),
-	translate("Timeout for connecting to server (seconds, default: 10)"))
-o.datatype = "uinteger"
-o.placeholder = "10"
-o.rmempty = true
-
-o = s:option(Value, "dial_server_keepalive", translate("Dial Server Keepalive"),
-	translate("TCP keepalive interval for server connection (seconds)"))
-o.datatype = "uinteger"
-o.rmempty = true
-
-o = s:option(Value, "connect_server_local_ip", translate("Connect Server Local IP"),
-	translate("Bind local IP when connecting to server"))
-o.rmempty = true
-
-o = s:option(Value, "proxy_url", translate("Proxy URL"),
-	translate("Proxy for server connection (e.g. http://proxy:8080 or socks5://proxy:1080)"))
-o.rmempty = true
-
-o = s:option(Value, "tcp_mux_keepalive_interval", translate("TCP Mux Keepalive Interval"),
-	translate("TCP mux keepalive check interval (seconds)"))
-o.datatype = "uinteger"
-o.rmempty = true
-
 -- ================================================================
 -- Section: Log
 -- ================================================================
 s = m:section(NamedSection, "main", "frpc", translate("Log Settings"))
-
-o = s:option(ListValue, "log_to", translate("Log Output"))
-o:value("", translate("Default (console)"))
-o:value("console", "console")
-o.rmempty = true
-o.datatype = "string"
 
 o = s:option(ListValue, "log_level", translate("Log Level"))
 o:value("", translate("Default (info)"))
@@ -197,117 +102,6 @@ o.datatype = "uinteger"
 o.placeholder = "3"
 o.rmempty = true
 
-o = s:option(Flag, "log_disable_print_color", translate("Disable Log Color"),
-	translate("Disable colored output in console logs"))
-o.default = "0"
-o.rmempty = false
-
--- ================================================================
--- Section: TLS Advanced
--- ================================================================
-s = m:section(NamedSection, "main", "frpc", translate("TLS Advanced"),
-	translate("Advanced TLS configuration for server connection"))
-
-o = s:option(Flag, "tls_disable_custom_first_byte", translate("Disable Custom TLS First Byte"),
-	translate("Do not send 0x17 special byte (cannot share port with vhostHTTPS when enabled)"))
-o.default = "0"
-o.rmempty = false
-
-o = s:option(Value, "tls_cert_file", translate("TLS Certificate File"),
-	translate("Path to TLS client certificate file"))
-o.rmempty = true
-
-o = s:option(Value, "tls_key_file", translate("TLS Key File"),
-	translate("Path to TLS client private key file"))
-o.rmempty = true
-
-o = s:option(Value, "tls_trusted_ca_file", translate("TLS CA File"),
-	translate("Path to trusted CA certificate file"))
-o.rmempty = true
-
-o = s:option(Value, "tls_server_name", translate("TLS Server Name"),
-	translate("TLS server name for SNI"))
-o.rmempty = true
-
--- ================================================================
--- Section: QUIC Options
--- ================================================================
-s = m:section(NamedSection, "main", "frpc", translate("QUIC Options"),
-	translate("QUIC protocol options (when transport protocol is QUIC)"))
-
-o = s:option(Value, "quic_keepalive_period", translate("QUIC Keepalive Period"),
-	translate("QUIC keepalive period in seconds (default: 10)"))
-o.datatype = "uinteger"
-o.placeholder = "10"
-o.rmempty = true
-
-o = s:option(Value, "quic_max_idle_timeout", translate("QUIC Max Idle Timeout"),
-	translate("QUIC max idle timeout in seconds (default: 30)"))
-o.datatype = "uinteger"
-o.placeholder = "30"
-o.rmempty = true
-
-o = s:option(Value, "quic_max_incoming_streams", translate("QUIC Max Incoming Streams"),
-	translate("QUIC max incoming streams (default: 100000)"))
-o.datatype = "uinteger"
-o.placeholder = "100000"
-o.rmempty = true
-
--- ================================================================
--- Section: Web Server (Admin Dashboard)
--- ================================================================
-s = m:section(NamedSection, "main", "frpc", translate("Web Server"),
-	translate("Local admin dashboard for frpc (optional)"))
-
-o = s:option(Value, "web_server_addr", translate("Listen Address"),
-	translate("Admin dashboard listen address (default: 127.0.0.1)"))
-o.placeholder = "127.0.0.1"
-o.rmempty = true
-
-o = s:option(Value, "web_server_port", translate("Listen Port"),
-	translate("Admin dashboard listen port"))
-o.datatype = "port"
-o.rmempty = true
-
-o = s:option(Value, "web_server_user", translate("Username"),
-	translate("HTTP Basic Auth username for admin dashboard"))
-o.rmempty = true
-
-o = s:option(Value, "web_server_password", translate("Password"),
-	translate("HTTP Basic Auth password for admin dashboard"))
-o.password = true
-o.rmempty = true
-
-o = s:option(Value, "web_server_assets_dir", translate("Assets Directory"),
-	translate("Custom static assets directory for dashboard"))
-o.rmempty = true
-
-o = s:option(Flag, "web_server_pprof_enable", translate("Enable pprof"),
-	translate("Enable Go HTTP pprof for debugging"))
-o.default = "0"
-o.rmempty = false
-
--- ================================================================
--- Section: Experimental
--- ================================================================
-s = m:section(NamedSection, "main", "frpc", translate("Experimental"),
-	translate("Alpha and experimental features"))
-
-o = s:option(Value, "virtual_net_address", translate("VirtualNet Address"),
-	translate("Virtual network CIDR address (e.g. 100.86.0.1/24) - Alpha feature"))
-o.rmempty = true
-o.placeholder = "100.86.0.1/24"
-
-o = s:option(Value, "feature_gates", translate("Feature Gates"),
-	translate("Experimental features separated by | (e.g. VirtualNet:true)"))
-o.rmempty = true
-o.placeholder = "VirtualNet:true"
-
-o = s:option(Value, "includes", translate("Config Includes"),
-	translate("Additional config file paths separated by | (e.g. /etc/frp/proxies/|/etc/frp/extra.toml)"))
-o.rmempty = true
-o.placeholder = "/etc/frp/proxies/"
-
 -- ================================================================
 -- Section: Advanced Client Settings
 -- ================================================================
@@ -320,21 +114,6 @@ o.rmempty = false
 
 o = s:option(Value, "dns_server", translate("DNS Server"),
 	translate("Custom DNS server address (e.g. 8.8.8.8)"))
-o.rmempty = true
-
-o = s:option(Value, "nat_hole_stun_server", translate("STUN Server"),
-	translate("STUN server for XTCP NAT traversal (default: stun.easyvoip.com:3478)"))
-o.rmempty = true
-o.placeholder = "stun.easyvoip.com:3478"
-
-o = s:option(Value, "udp_packet_size", translate("UDP Packet Size"),
-	translate("Max UDP packet size in bytes (default: 1500, must match server)"))
-o.datatype = "uinteger"
-o.placeholder = "1500"
-o.rmempty = true
-
-o = s:option(Value, "store_path", translate("Store Path"),
-	translate("Persistent store file path for dynamic proxy management"))
 o.rmempty = true
 
 o = s:option(Value, "metadatas", translate("Metadatas"),
