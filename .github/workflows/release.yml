@@ -20,8 +20,8 @@ jobs:
       - name: Extract version
         id: version
         run: |
-          VERSION=$(grep '^PKG_VERSION:=' Makefile | cut -d= -f2)
-          RELEASE=$(grep '^PKG_RELEASE:=' Makefile | cut -d= -f2)
+          VERSION=$(grep '^PKG_VERSION:=' Makefile | cut -d= -f2 | tr -d '\r\n')
+          RELEASE=$(grep '^PKG_RELEASE:=' Makefile | cut -d= -f2 | tr -d '\r\n')
           FULL_VERSION="${VERSION}-${RELEASE}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "release=$RELEASE" >> $GITHUB_OUTPUT
