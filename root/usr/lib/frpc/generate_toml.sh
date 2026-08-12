@@ -522,14 +522,100 @@ generate_proxy() {
     echo "" >> "$OUTPUT_FILE"
 }
 
+# ---- visitor ----
+
+generate_visitor() {
+    local section="$1"
+    local name type server_user server_name
+    local secret_key bind_addr bind_port
+    local use_encryption use_compression
+    local protocol pool_count
+    local bandwidth_limit bandwidth_limit_mode transport_type metadatas
+    local keep_tunnel_open max_retries fallback_to fallback_timeout_ms
+
+    name=$(sec_get "$section" name "")
+    type=$(sec_get "$section" type "stcp")
+    server_user=$(sec_get "$section" server_user "")
+    server_name=$(sec_get "$section" server_name "")
+    secret_key=$(sec_get "$section" secret_key "")
+    bind_addr=$(sec_get "$section" bind_addr "127.0.0.1")
+    bind_port=$(sec_get "$section" bind_port "")
+
+    if [ -z "$name" ] || [ -z "$server_name" ] || [ -z "$bind_port" ]; then
+        echo "Warning: visitor $section missing name, server_name or bind_port, skipping" >&2
+        return
+    fi
+
+    echo "[[visitors]]" >> "$OUTPUT_FILE"
+    emit "name" "$name"
+    emit "type" "$type"
+    [ -n "$server_user" ] && emit "serverUser" "$server_user"
+    emit "serverName" "$server_name"
+    [ -n "$secret_key" ] && emit "secretKey" "$secret_key"
+    emit "bindAddr" "$bind_addr"
+    emit_int "bindPort" "$bind_port"
+
+    # Transport
+    use_encryption=$(sec_get "$section" use_encryption "")
+    use_compression=$(sec_get "$section" use_compression "")
+    pool_count=$(sec_get "$section" pool_count "")
+    bandwidth_limit=$(sec_get "$section" bandwidth_limit "")
+    bandwidth_limit_mode=$(sec_get "$section" bandwidth_limit_mode "")
+    transport_type=$(sec_get "$section" transport_type "")
+
+    if [ -n "$use_encryption" ] || [ -n "$use_compression" ] || [ -n "$pool_count" ] || \
+       [ -n "$bandwidth_limit" ] || [ -n "$transport_type" ]; then
+        printf '[visitors.transport]\n'
+        [ -n "$use_encryption" ] && emit_raw "useEncryption" "$use_encryption"
+        [ -n "$use_compression" ] && emit_raw "useCompression" "$use_compression"
+        [ -n "$pool_count" ] && emit_int "poolCount" "$pool_count"
+        [ -n "$bandwidth_limit" ] && emit "bandwidthLimit" "$bandwidth_limit"
+        [ -n "$bandwidth_limit_mode" ] && emit "bandwidthLimitMode" "$bandwidth_limit_mode"
+        [ -n "$transport_type" ] && emit "transportType" "$transport_type"
+        echo ""
+    fi
+
+    # XTCP specific
+    if [ "$type" = "xtcp" ]; then
+        protocol=$(sec_get "$section" protocol "")
+        keep_tunnel_open=$(sec_get "$section" keep_tunnel_open "0")
+        max_retries=$(sec_get "$section" max_retries "")
+        fallback_to=$(sec_get "$section" fallback_to "")
+        fallback_timeout_ms=$(sec_get "$section" fallback_timeout_ms "")
+
+        [ -n "$protocol" ] && emit "protocol" "$protocol"
+        [ "$keep_tunnel_open" = "1" ] && echo "keepTunnelOpen = true"
+        [ -n "$max_retries" ] && emit_int "maxRetriesAnHour" "$max_retries"
+        [ -n "$fallback_to" ] && emit "fallbackTo" "$fallback_to"
+        [ -n "$fallback_timeout_ms" ] && emit_int "fallbackTimeoutMs" "$fallback_timeout_ms"
+    fi
+
+    # Metadatas
+    metadatas=$(sec_get "$section" metadatas "")
+    [ -n "$metadatas" ] && emit_map "[visitors.metadatas]" "$metadatas"
+
+    echo "" >> "$OUTPUT_FILE"
+}
+
 # ---- main ----
 
 mkdir -p "$(dirname "$OUTPUT_FILE")"
 generate_client
 
 # Append each enabled proxy
-for section in $(uci -q show "$FRPC_CONFIG" | grep "\.enabled='1'" | cut -d. -f2 | sort -u); do
+for section in $(uci -q show "$FRPC_CONFIG" | grep "=proxy$" | cut -d. -f2 | cut -d= -f1 | while read s; do
+    enabled=$(uci -q get "$FRPC_CONFIG.$s.enabled" 2>/dev/null)
+    [ "$enabled" = "1" ] && echo "$s"
+done); do
     generate_proxy "$section" >> "$OUTPUT_FILE"
+done
+
+# Append each enabled visitor
+for section in $(uci -q show "$FRPC_CONFIG" | grep "=visitor$" | cut -d. -f2 | cut -d= -f1 | while read s; do
+    enabled=$(uci -q get "$FRPC_CONFIG.$s.enabled" 2>/dev/null)
+    [ "$enabled" = "1" ] && echo "$s"
+done); do
+    generate_visitor "$section" >> "$OUTPUT_FILE"
 done
 
 # Verify generated config

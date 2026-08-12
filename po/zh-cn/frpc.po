@@ -505,3 +505,83 @@ msgstr "配置生成时间"
 
 msgid "never"
 msgstr "从未"
+
+# === Visitors ===
+
+msgid "Visitors"
+msgstr "访客"
+
+msgid "Visitor"
+msgstr "访客"
+
+msgid "frpc Visitors"
+msgstr "frpc 访客管理"
+
+msgid "Manage STCP/XTCP/SUDP visitors to connect to remote server-side proxies."
+msgstr "管理 STCP/XTCP/SUDP 访客，连接远程服务端代理。"
+
+msgid "Visitor List"
+msgstr "访客列表"
+
+msgid "Visitor Name"
+msgstr "访客名称"
+
+msgid "Visitor Configuration"
+msgstr "访客配置"
+
+msgid "Visitor Settings"
+msgstr "访客设置"
+
+msgid "Server User"
+msgstr "服务端用户"
+
+msgid "Username of the server-side proxy owner (empty = same user)"
+msgstr "服务端代理所属用户名（留空表示同一用户）"
+
+msgid "Server Reference"
+msgstr "服务端引用"
+
+msgid "Bind Address"
+msgstr "监听地址"
+
+msgid "Local address to listen on for incoming connections"
+msgstr "监听传入连接的本地地址"
+
+msgid "Bind Port"
+msgstr "监听端口"
+
+msgid "Local port to listen on for incoming connections"
+msgstr "监听传入连接的本地端口"
+
+msgid "NAT Traversal"
+msgstr "NAT 穿透"
+
+msgid "Keep Tunnel Open"
+msgstr "保持隧道打开"
+
+msgid "Keep the P2P tunnel open even when no traffic"
+msgstr "即使没有流量也保持 P2P 隧道打开"
+
+msgid "Max Retries per Hour"
+msgstr "每小时最大重试次数"
+
+msgid "Maximum number of connection retries per hour"
+msgstr "每小时最大连接重试次数"
+
+msgid "Fallback To"
+msgstr "回退方式"
+
+msgid "Fallback to this proxy type when P2P fails"
+msgstr "P2P 失败时回退到此代理类型"
+
+msgid "None"
+msgstr "无"
+
+msgid "Fallback Timeout (ms)"
+msgstr "回退超时（毫秒）"
+
+msgid "Timeout in milliseconds before falling back"
+msgstr "回退前的超时时间（毫秒）"
+
+msgid "Add Visitor"
+msgstr "添加访客"

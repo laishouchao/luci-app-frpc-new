@@ -8,6 +8,8 @@ function index()
 	entry({"admin", "services", "frpc"}, alias("admin", "services", "frpc", "client"), _("frpc"), 60)
 	entry({"admin", "services", "frpc", "client"}, cbi("frpc-client"), _("Settings"), 10)
 	entry({"admin", "services", "frpc", "client", "proxy"}, cbi("frpc-proxy"), _("Proxy"), 20).leaf = true
+	entry({"admin", "services", "frpc", "visitors"}, cbi("frpc-visitors"), _("Visitors"), 30)
+	entry({"admin", "services", "frpc", "visitors", "visitor"}, cbi("frpc-visitor"), _("Visitor"), 10).leaf = true
 	entry({"admin", "services", "frpc", "client", "status"}, call("action_status")).leaf = true
 end
 

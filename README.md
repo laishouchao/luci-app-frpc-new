@@ -9,6 +9,11 @@ OpenWrt LuCI 应用 — frpc 内网穿透客户端管理界面
 ### 支持的代理类型
 - **TCP** / **UDP** / **HTTP** / **HTTPS** / **TCPMux** / **STCP** / **XTCP** / **SUDP**
 
+### Visitor 访客配置
+- STCP / XTCP / SUDP 访客端支持
+- XTCP NAT 穿透：keepTunnelOpen、fallbackTo（STCP/server）、maxRetries、protocol(quic/kcp/tcp)
+- 传输设置：加密、压缩、带宽限制、连接池
+
 ### 客户端配置
 - 服务器连接（地址、端口、客户端用户名、客户端 ID）
 - 认证方式（Token / OIDC / Token 文件加载）
@@ -38,7 +43,9 @@ luci-app-frpc-new/
 │   ├── controller/frpc.lua     # LuCI 路由和状态 API
 │   └── model/cbi/
 │       ├── frpc-client.lua     # 主设置页：服务器连接 + 代理列表
-│       └── frpc-proxy.lua      # 代理编辑页：5 个标签页
+│       ├── frpc-proxy.lua      # 代理编辑页：5 个标签页
+│       ├── frpc-visitors.lua   # 访客列表页
+│       └── frpc-visitor.lua    # 访客编辑页：3 个标签页
 ├── root/
 │   ├── etc/config/frpc         # UCI 默认配置
 │   ├── etc/init.d/frpc         # procd 服务管理脚本
