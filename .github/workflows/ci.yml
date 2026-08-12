@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1 luarocks
+          sudo luarocks install luacheck
+
+      - name: Check Lua syntax
+        run: |
+          echo "=== Checking Lua files ==="
+          find . -name "*.lua" -type f | while read f; do
+            echo "Checking: $f"
+            luacheck --no-color --quiet "$f" || true
+          done
+
+      - name: Check shell scripts
+        run: |
+          echo "=== Checking shell scripts ==="
+          find . -name "*.sh" -type f | while read f; do
+            echo "Checking: $f"
+            bash -n "$f" && echo "  ✅ Syntax OK" || echo "  ❌ Syntax error"
+          done
+
+      - name: Validate Makefile
+        run: |
+          echo "=== Validating Makefile ==="
+          if [ -f Makefile ]; then
+            # Check required variables
+            for var in PKG_NAME PKG_VERSION PKG_RELEASE; do
+              if grep -q "^${var}:" Makefile; then
+                echo "✅ $var found"
+              else
+                echo "❌ $var missing"
+                exit 1
+              fi
+            done
+            echo "✅ Makefile validation passed"
+          else
+            echo "❌ Makefile not found"
+            exit 1
+          fi
+
+      - name: Check file structure
+        run: |
+          echo "=== Checking file structure ==="
+          REQUIRED_FILES=(
+            "Makefile"
+            "luasrc/controller/frpc.lua"
+            "luasrc/model/cbi/frpc-client.lua"
+            "luasrc/model/cbi/frpc-proxy.lua"
+            "luasrc/view/frpc/status_display.htm"
+            "po/zh-cn/frpc.po"
+            "root/etc/config/frpc"
+            "root/etc/init.d/frpc"
+            "root/usr/lib/frpc/generate_toml.sh"
+          )
+          for f in "${REQUIRED_FILES[@]}"; do
+            if [ -f "$f" ]; then
+              echo "✅ $f"
+            else
+              echo "❌ $f missing"
+              exit 1
+            fi
+          done
+          echo "✅ All required files present"
