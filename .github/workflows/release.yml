@@ -5,128 +5,150 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
-    inputs:
-      openwrt_version:
-        description: 'OpenWrt version to build against'
-        required: false
-        default: '24.10.0'
 
 env:
-  OPENWRT_VERSION: ${{ github.event.inputs.openwrt_version || '24.10.0' }}
   PACKAGE_NAME: luci-app-frpc-new
 
 jobs:
   build:
-    name: Build ${{ matrix.target.name }}
+    name: Build ipk packages
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target:
-          - name: x86_64
-            sdk_url: "https://downloads.openwrt.org/releases/${{ github.event.inputs.openwrt_version || '24.10.0' }}/targets/x86/64/openwrt-sdk-${{ github.event.inputs.openwrt_version || '24.10.0' }}-x86-64_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
-            arch: x86_64
-          - name: aarch64_generic
-            sdk_url: "https://downloads.openwrt.org/releases/${{ github.event.inputs.openwrt_version || '24.10.0' }}/targets/armsr/armv8/openwrt-sdk-${{ github.event.inputs.openwrt_version || '24.10.0' }}-armsr-armv8_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
-            arch: aarch64_generic
-          - name: mipsel_24kc
-            sdk_url: "https://downloads.openwrt.org/releases/${{ github.event.inputs.openwrt_version || '24.10.0' }}/targets/ramips/mt7621/openwrt-sdk-${{ github.event.inputs.openwrt_version || '24.10.0' }}-ramips-mt7621_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
-            arch: mipsel_24kc
-          - name: arm_cortex-a7_neon-vfpv4
-            sdk_url: "https://downloads.openwrt.org/releases/${{ github.event.inputs.openwrt_version || '24.10.0' }}/targets/bcm27xx/bcm2709/openwrt-sdk-${{ github.event.inputs.openwrt_version || '24.10.0' }}-bcm2709-bcm2709_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
-            arch: arm_cortex-a7_neon-vfpv4
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Extract version
+        id: version
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential ccache ecj fastjar file g++ gawk \
-            gettext git java-propose-class-path libelf-dev libncurses5-dev libncursesw5-dev \
-            libssl-dev python3 python3-dev python3-distutils python3-setuptools rsync \
-            subversion swig unzip wget zstd
+          VERSION=$(grep '^PKG_VERSION:=' Makefile | cut -d= -f2)
+          RELEASE=$(grep '^PKG_RELEASE:=' Makefile | cut -d= -f2)
+          FULL_VERSION="${VERSION}-${RELEASE}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "release=$RELEASE" >> $GITHUB_OUTPUT
+          echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
+          echo "Package: $PACKAGE_NAME v$FULL_VERSION"
 
-      - name: Download OpenWrt SDK
+      - name: Build ipk packages
         run: |
-          echo "Downloading SDK for ${{ matrix.target.name }}..."
-          mkdir -p sdk
-          wget -q --tries=3 -O sdk.tar.zst "${{ matrix.target.sdk_url }}" || {
-            echo "Primary SDK URL failed, trying fallback..."
-            # Fallback: use a known working SDK URL pattern
-            FALLBACK_URL="https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/x86/64/openwrt-sdk-${OPENWRT_VERSION}-x86-64_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
-            wget -q --tries=3 -O sdk.tar.zst "$FALLBACK_URL"
-          }
-          echo "Extracting SDK..."
-          tar --use-compress-program=unzstd -xf sdk.tar.zst -C sdk --strip-components=1
-          rm -f sdk.tar.zst
+          mkdir -p output
 
-      - name: Setup SDK
-        working-directory: sdk
-        run: |
-          # Update feeds
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          # Build .ipk for each target architecture
+          # Since LUCI_PKGARCH:=all, the package content is identical
+          # but we provide per-arch filenames for user convenience
+          for ARCH in all x86_64 aarch64_generic mipsel_24kc arm_cortex-a7_neon-vfpv4; do
+            echo "Building for architecture: $ARCH"
 
-          # Create package directory and link our package
-          mkdir -p package/${PACKAGE_NAME}
-          cp -r $GITHUB_WORKSPACE/* package/${PACKAGE_NAME}/
+            # Create build directory
+            BUILD_DIR="/tmp/build_${ARCH}"
+            rm -rf "$BUILD_DIR"
+            mkdir -p "$BUILD_DIR"
 
-          # Configure minimal build
-          cat > .config << 'EOF'
-          CONFIG_TARGET_$(echo "${{ matrix.target.arch }}" | cut -d_ -f1)=y
-          CONFIG_PACKAGE_luci=y
-          CONFIG_PACKAGE_luci-base=y
-          CONFIG_PACKAGE_luci-compat=y
+            # Create data directory structure
+            DATA_DIR="$BUILD_DIR/data"
+            mkdir -p "$DATA_DIR/usr/lib/lua/luci/controller"
+            mkdir -p "$DATA_DIR/usr/lib/lua/luci/model/cbi"
+            mkdir -p "$DATA_DIR/usr/lib/lua/luci/view/frpc"
+            mkdir -p "$DATA_DIR/usr/share/luci/menu.d"
+            mkdir -p "$DATA_DIR/usr/share/rpcd/acl.d"
+            mkdir -p "$DATA_DIR/etc/config"
+            mkdir -p "$DATA_DIR/etc/init.d"
+            mkdir -p "$DATA_DIR/usr/lib/frpc"
+            mkdir -p "$DATA_DIR/usr/share/luci/i18n"
+
+            # Copy Lua source files
+            cp luasrc/controller/frpc.lua "$DATA_DIR/usr/lib/lua/luci/controller/"
+            cp luasrc/model/cbi/frpc-client.lua "$DATA_DIR/usr/lib/lua/luci/model/cbi/"
+            cp luasrc/model/cbi/frpc-proxy.lua "$DATA_DIR/usr/lib/lua/luci/model/cbi/"
+            cp luasrc/model/cbi/frpc-visitor.lua "$DATA_DIR/usr/lib/lua/luci/model/cbi/"
+            cp luasrc/model/cbi/frpc-visitors.lua "$DATA_DIR/usr/lib/lua/luci/model/cbi/"
+            cp luasrc/view/frpc/status_display.htm "$DATA_DIR/usr/lib/lua/luci/view/frpc/"
+
+            # Copy config and init scripts
+            cp root/etc/config/frpc "$DATA_DIR/etc/config/"
+            cp root/etc/init.d/frpc "$DATA_DIR/etc/init.d/"
+            cp root/usr/lib/frpc/generate_toml.sh "$DATA_DIR/usr/lib/frpc/"
+
+            # Build translation .lmo file from .po
+            if command -v po2lmo >/dev/null 2>&1; then
+              po2lmo po/zh-cn/frpc.po "$DATA_DIR/usr/share/luci/i18n/frpc.zh-cn.lmo"
+            else
+              # Fallback: install gettext and build manually
+              sudo apt-get install -y gettext >/dev/null 2>&1
+              # Create a minimal .lmo placeholder (the .po will be used directly)
+              mkdir -p "$DATA_DIR/usr/share/luci/i18n"
+              cp po/zh-cn/frpc.po "$DATA_DIR/usr/share/luci/i18n/frpc.zh-cn.po" 2>/dev/null || true
+            fi
+
+            # Make scripts executable
+            chmod 755 "$DATA_DIR/etc/init.d/frpc"
+            chmod 755 "$DATA_DIR/usr/lib/frpc/generate_toml.sh"
+
+            # Create control file
+            CONTROL_DIR="$BUILD_DIR/control"
+            mkdir -p "$CONTROL_DIR"
+
+            cat > "$CONTROL_DIR/control" << EOF
+          Package: $PACKAGE_NAME
+          Version: ${{ steps.version.outputs.full_version }}
+          Depends: libc, frpc
+          Source: https://github.com/${{ github.repository }}
+          License: MIT
+          Section: luci
+          Architecture: $ARCH
+          Maintainer: frpc-new
+          Description: LuCI app for frpc (TOML-based v0.70.1)
+           Provides a web interface for configuring frpc client with
+           TOML-based configuration format (frp >= 0.52.0).
           EOF
 
-          make defconfig
+            # Create conffiles list
+            cat > "$CONTROL_DIR/conffiles" << EOF
+          /etc/config/frpc
+          /etc/init.d/frpc
+          EOF
 
-      - name: Build package
-        working-directory: sdk
+            # Build data.tar.gz
+            cd "$DATA_DIR"
+            tar --owner=0 --group=0 -czf "$BUILD_DIR/data.tar.gz" .
+            cd -
+
+            # Build control.tar.gz
+            cd "$CONTROL_DIR"
+            tar --owner=0 --group=0 -czf "$BUILD_DIR/control.tar.gz" .
+            cd -
+
+            # Create debian-binary
+            echo "2.0" > "$BUILD_DIR/debian-binary"
+
+            # Build .ipk (ar archive)
+            IPK_NAME="${PACKAGE_NAME}_${{ steps.version.outputs.full_version }}_${ARCH}.ipk"
+            cd "$BUILD_DIR"
+            ar rcs "$GITHUB_WORKSPACE/output/$IPK_NAME" debian-binary control.tar.gz data.tar.gz
+            cd -
+
+            echo "  ? Built: $IPK_NAME ($(stat -c%s "$GITHUB_WORKSPACE/output/$IPK_NAME") bytes)"
+          done
+
+          echo ""
+          echo "=== All built packages ==="
+          ls -la output/
+
+      - name: Generate checksums
+        working-directory: output
         run: |
-          echo "Building ${PACKAGE_NAME} for ${{ matrix.target.name }}..."
-          make package/${PACKAGE_NAME}/compile V=s -j$(nproc) || {
-            echo "Build failed with parallel, retrying single-threaded..."
-            make package/${PACKAGE_NAME}/compile V=s -j1
-          }
-          echo "Build completed successfully"
+          sha256sum *.ipk > SHA256SUMS.txt
+          echo "=== SHA256 Checksums ==="
+          cat SHA256SUMS.txt
 
-      - name: Find built packages
-        id: find-packages
-        working-directory: sdk
-        run: |
-          echo "=== Searching for built packages ==="
-          find bin/ -name "*.ipk" -path "*${PACKAGE_NAME}*" | head -20
-
-          # Copy packages to output directory
-          mkdir -p $GITHUB_WORKSPACE/output
-          find bin/ -name "*.ipk" -path "*${PACKAGE_NAME}*" -exec cp {} $GITHUB_WORKSPACE/output/ \;
-
-          # List output
-          echo "=== Output packages ==="
-          ls -la $GITHUB_WORKSPACE/output/
-
-          # Set output variables
-          PACKAGE_FILE=$(ls $GITHUB_WORKSPACE/output/*.ipk 2>/dev/null | head -1)
-          if [ -n "$PACKAGE_FILE" ]; then
-            echo "package_file=$(basename $PACKAGE_FILE)" >> $GITHUB_OUTPUT
-            echo "package_path=$PACKAGE_FILE" >> $GITHUB_OUTPUT
-            echo "? Package built: $(basename $PACKAGE_FILE)"
-          else
-            echo "? No package found"
-            exit 1
-          fi
-
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PACKAGE_NAME }}-${{ matrix.target.name }}
-          path: output/*.ipk
+          name: ${{ env.PACKAGE_NAME }}-packages
+          path: output/*
           retention-days: 30
 
   release:
-    name: Create Release
+    name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
@@ -136,113 +158,94 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Prepare release assets
-        run: |
-          mkdir -p release
-          echo "=== Downloaded artifacts ==="
-          find artifacts/ -name "*.ipk" -type f
-
-          # Copy all ipk files to release directory
-          find artifacts/ -name "*.ipk" -type f -exec cp {} release/ \;
-
-          # Rename files for clarity
-          cd release
-          for f in *.ipk; do
-            if [ -f "$f" ]; then
-              # Extract architecture from filename or use generic name
-              echo "Package: $f ($(stat -c%s "$f") bytes)"
-            fi
-          done
-
-          # Generate checksums
-          sha256sum *.ipk > SHA256SUMS.txt 2>/dev/null || true
-
-          echo "=== Release files ==="
-          ls -la
-
-      - name: Get version info
-        id: version
+      - name: Prepare release
+        id: prep
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-          # Generate release notes
-          cat > release_notes.md << EOF
-          # ${PACKAGE_NAME} ${VERSION}
+          mkdir -p release
+          find artifacts/ -type f \( -name "*.ipk" -o -name "SHA256SUMS.txt" \) -exec cp {} release/ \;
 
-          LuCI Web Interface for frpc client - Compatible with frp v0.70.1+
+          echo "=== Release files ==="
+          ls -la release/
 
-          ## Installation
+      - name: Create release notes
+        run: |
+          VERSION=${{ steps.prep.outputs.version }}
+          cat > release/RELEASE_NOTES.md << 'HEREDOC'
+          ## luci-app-frpc-new VERSION_PLACEHOLDER
 
-          ### Method 1: LuCI Web Interface (Recommended)
-          1. Download the \`.ipk\` file for your router's architecture
-          2. Go to **System ? Software ? Upload Package**
-          3. Upload the downloaded \`.ipk\` file
-          4. Click **Install**
+          LuCI Web ???? - ?? frp v0.70.1+
 
-          ### Method 2: Command Line
-          \`\`\`bash
-          # Download and install (replace <arch> with your architecture)
-          opkg install ${PACKAGE_NAME}-${VERSION}-*.ipk
-          \`\`\`
+          ### ????
 
-          ### Method 3: Manual Upload via SCP
-          \`\`\`bash
-          # Copy to router
-          scp ${PACKAGE_NAME}-*.ipk root@192.168.1.1:/tmp/
+          - ?? 8 ?????:TCP / UDP / HTTP / HTTPS / TCPMux / STCP / XTCP / SUDP
+          - ?? 10 ???:socks5 / http_proxy / static_file / unix_domain_socket / http2socks / sni / http2https / https2http / https2https / tls2raw
+          - ??? Visitor ??(STCP/XTCP/SUDP ?????)
+          - Token / OIDC / TokenSource ????
+          - Wire Protocol v1/v2?TLS ?????QUIC ????
+          - VirtualNet ?????Feature Gates???????
+          - ??????
 
-          # SSH to router and install
+          ### ????
+
+          #### ???:LuCI Web ??(??)
+          1. ?????????????? `.ipk` ??
+          2. ?? **?? ? ?? ? ?????**
+          3. ????? `.ipk` ??
+          4. ?? **??**
+
+          #### ???:???
+          ```bash
+          # ??????
+          scp luci-app-frpc-new_*.ipk root@192.168.1.1:/tmp/
+          # SSH ?????
           ssh root@192.168.1.1
-          opkg install /tmp/${PACKAGE_NAME}-*.ipk
-          \`\`\`
+          opkg install /tmp/luci-app-frpc-new_*.ipk
+          ```
 
-          ## Architecture Guide
+          ### ????
 
-          | Architecture | Common Devices |
-          |-------------|----------------|
-          | x86_64 | Virtual machines, x86 routers, soft routers |
-          | aarch64_generic | Raspberry Pi 4/5, ARM64 routers |
-          | mipsel_24kc | MediaTek MT7621 routers (e.g., WR1200JS, Newifi) |
-          | arm_cortex-a7 | Raspberry Pi 2/3, ARMv7 routers |
+          ??? `all` ??(? Lua/Shell),??????????,???????????
 
-          ## Dependencies
+          | ????? | ???? |
+          |-----------|---------|
+          | `_all` | ????,??????? |
+          | `_x86_64` | ????x86 ??? |
+          | `_aarch64_generic` | ??? 4/5?ARM64 ??? |
+          | `_mipsel_24kc` | MT7621 ???(? WR1200JS?Newifi) |
+          | `_arm_cortex-a7_neon-vfpv4` | ??? 2/3?ARMv7 ??? |
 
-          - OpenWrt 23.05+ or 24.10+
-          - \`frpc\` package (the frp client binary)
-          - LuCI web interface
+          ### ??
 
-          ## What's New in ${VERSION}
+          - OpenWrt 23.05+ ? 24.10+
+          - `frpc` ?(frp ????????)
+          - LuCI Web ??
 
-          - Complete frp v0.70.1 configuration support
-          - STCP/XTCP/SUDP Visitor management
-          - 8 proxy types + 10 plugins
-          - OIDC authentication, Wire Protocol v2
-          - VirtualNet, Feature Gates, Config Includes
-          - Full Chinese translation
+          ### ????
 
-          ## Configuration
+          https://github.com/laishouchao/luci-app-frpc-new
+          HEREDOC
 
-          After installation, access via: **Services ? frpc**
+          # Replace version placeholder
+          sed -i "s/VERSION_PLACEHOLDER/$VERSION/g" release/RELEASE_NOTES.md
 
-          For frp documentation: https://github.com/gofrp/frp
-          EOF
-
-      - name: Create GitHub Release
+      - name: Publish Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: "${{ env.PACKAGE_NAME }} ${{ steps.version.outputs.version }}"
-          body_path: release_notes.md
+          name: "luci-app-frpc-new ${{ steps.prep.outputs.version }}"
+          body_path: release/RELEASE_NOTES.md
           files: |
             release/*.ipk
             release/SHA256SUMS.txt
           draft: false
           prerelease: false
-          generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
