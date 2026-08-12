@@ -585,3 +585,151 @@ msgstr "回退前的超时时间（毫秒）"
 
 msgid "Add Visitor"
 msgstr "添加访客"
+
+# === Transport Advanced ===
+
+msgid "Dial Server Timeout"
+msgstr "连接服务器超时"
+
+msgid "Timeout for connecting to server (seconds, default: 10)"
+msgstr "连接服务器的超时时间（秒，默认 10）"
+
+msgid "Dial Server Keepalive"
+msgstr "连接服务器 Keepalive"
+
+msgid "TCP keepalive interval for server connection (seconds)"
+msgstr "与服务器底层 TCP 连接的 keepalive 间隔（秒）"
+
+msgid "Connect Server Local IP"
+msgstr "连接服务器本地 IP"
+
+msgid "Bind local IP when connecting to server"
+msgstr "连接服务器时绑定的本地 IP"
+
+msgid "Proxy URL"
+msgstr "代理 URL"
+
+msgid "Proxy for server connection (e.g. http://proxy:8080 or socks5://proxy:1080)"
+msgstr "连接服务器使用的代理地址（如 http://proxy:8080 或 socks5://proxy:1080）"
+
+msgid "TCP Mux Keepalive Interval"
+msgstr "TCP Mux 心跳间隔"
+
+msgid "TCP mux keepalive check interval (seconds)"
+msgstr "TCP 多路复用心跳检查间隔（秒）"
+
+# === TLS Advanced ===
+
+msgid "TLS Advanced"
+msgstr "TLS 高级配置"
+
+msgid "Advanced TLS configuration for server connection"
+msgstr "服务器连接的高级 TLS 配置"
+
+msgid "Disable Custom TLS First Byte"
+msgstr "禁用 TLS 自定义首字节"
+
+msgid "Do not send 0x17 special byte (cannot share port with vhostHTTPS when enabled)"
+msgstr "不发送 0x17 特殊字节（启用后无法与 vhostHTTPS 端口复用）"
+
+msgid "TLS Certificate File"
+msgstr "TLS 证书文件"
+
+msgid "Path to TLS client certificate file"
+msgstr "TLS 客户端证书文件路径"
+
+msgid "TLS Key File"
+msgstr "TLS 密钥文件"
+
+msgid "Path to TLS client private key file"
+msgstr "TLS 客户端私钥文件路径"
+
+msgid "TLS CA File"
+msgstr "TLS CA 文件"
+
+msgid "Path to trusted CA certificate file"
+msgstr "受信任的 CA 证书文件路径"
+
+msgid "TLS Server Name"
+msgstr "TLS 服务器名称"
+
+msgid "TLS server name for SNI"
+msgstr "TLS SNI 服务器名称"
+
+# === QUIC Options ===
+
+msgid "QUIC Options"
+msgstr "QUIC 选项"
+
+msgid "QUIC protocol options (when transport protocol is QUIC)"
+msgstr "QUIC 协议选项（当传输协议为 QUIC 时）"
+
+msgid "QUIC Keepalive Period"
+msgstr "QUIC 保活周期"
+
+msgid "QUIC keepalive period in seconds (default: 10)"
+msgstr "QUIC 保活周期（秒，默认 10）"
+
+msgid "QUIC Max Idle Timeout"
+msgstr "QUIC 最大空闲超时"
+
+msgid "QUIC max idle timeout in seconds (default: 30)"
+msgstr "QUIC 最大空闲超时（秒，默认 30）"
+
+msgid "QUIC Max Incoming Streams"
+msgstr "QUIC 最大入站流"
+
+msgid "QUIC max incoming streams (default: 100000)"
+msgstr "QUIC 最大入站流数量（默认 100000）"
+
+# === Web Server ===
+
+msgid "Web Server"
+msgstr "Web 服务器"
+
+msgid "Local admin dashboard for frpc (optional)"
+msgstr "frpc 本地管理面板（可选）"
+
+msgid "Listen Address"
+msgstr "监听地址"
+
+msgid "Admin dashboard listen address (default: 127.0.0.1)"
+msgstr "管理面板监听地址（默认 127.0.0.1）"
+
+msgid "Listen Port"
+msgstr "监听端口"
+
+msgid "Admin dashboard listen port"
+msgstr "管理面板监听端口"
+
+# === New Plugins ===
+
+msgid "Plugin Local Address"
+msgstr "插件本地地址"
+
+msgid "Local address for protocol conversion plugin (e.g. 127.0.0.1:443)"
+msgstr "协议转换插件的本地地址（如 127.0.0.1:443）"
+
+msgid "Plugin Host Rewrite"
+msgstr "插件 Host 重写"
+
+msgid "Rewrite Host header for protocol conversion plugin"
+msgstr "协议转换插件的 Host 头重写"
+
+msgid "Enable HTTP/2"
+msgstr "启用 HTTP/2"
+
+msgid "Enable HTTP/2 for HTTPS plugin"
+msgstr "为 HTTPS 插件启用 HTTP/2"
+
+msgid "TLS Certificate"
+msgstr "TLS 证书"
+
+msgid "TLS certificate file path for plugin"
+msgstr "插件的 TLS 证书文件路径"
+
+msgid "TLS Key"
+msgstr "TLS 密钥"
+
+msgid "TLS key file path for plugin"
+msgstr "插件的 TLS 密钥文件路径"

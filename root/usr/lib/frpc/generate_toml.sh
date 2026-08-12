@@ -94,12 +94,18 @@ generate_client() {
     local user client_id
     local transport_protocol wire_protocol tcp_mux pool_count
     local heartbeat_interval heartbeat_timeout
+    local dial_server_timeout dial_server_keepalive
+    local connect_server_local_ip proxy_url tcp_mux_keepalive_interval
     local log_level log_max_days
     local dns_server login_fail_exit metadatas
     local nat_hole_stun_server udp_packet_size store_path
     local oidc_client_id oidc_client_secret oidc_audience oidc_scope
     local oidc_token_endpoint_url oidc_trusted_ca_file
     local oidc_insecure_skip_verify oidc_proxy_url
+    local tls_disable_custom_first_byte tls_cert_file tls_key_file
+    local tls_trusted_ca_file tls_server_name
+    local quic_keepalive_period quic_max_idle_timeout quic_max_incoming_streams
+    local web_server_addr web_server_port web_server_user web_server_password
 
     server_addr=$(uci_get server_addr "")
     tls_enable=$(uci_get tls "0")
@@ -117,6 +123,11 @@ generate_client() {
     pool_count=$(uci_get pool_count "")
     heartbeat_interval=$(uci_get heartbeat_interval "")
     heartbeat_timeout=$(uci_get heartbeat_timeout "")
+    dial_server_timeout=$(uci_get dial_server_timeout "")
+    dial_server_keepalive=$(uci_get dial_server_keepalive "")
+    connect_server_local_ip=$(uci_get connect_server_local_ip "")
+    proxy_url=$(uci_get proxy_url "")
+    tcp_mux_keepalive_interval=$(uci_get tcp_mux_keepalive_interval "")
 
     # Log
     log_level=$(uci_get log_level "")
@@ -139,6 +150,24 @@ generate_client() {
     oidc_trusted_ca_file=$(uci_get oidc_trusted_ca_file "")
     oidc_insecure_skip_verify=$(uci_get oidc_insecure_skip_verify "0")
     oidc_proxy_url=$(uci_get oidc_proxy_url "")
+
+    # TLS Advanced
+    tls_disable_custom_first_byte=$(uci_get tls_disable_custom_first_byte "0")
+    tls_cert_file=$(uci_get tls_cert_file "")
+    tls_key_file=$(uci_get tls_key_file "")
+    tls_trusted_ca_file=$(uci_get tls_trusted_ca_file "")
+    tls_server_name=$(uci_get tls_server_name "")
+
+    # QUIC
+    quic_keepalive_period=$(uci_get quic_keepalive_period "")
+    quic_max_idle_timeout=$(uci_get quic_max_idle_timeout "")
+    quic_max_incoming_streams=$(uci_get quic_max_incoming_streams "")
+
+    # WebServer
+    web_server_addr=$(uci_get web_server_addr "")
+    web_server_port=$(uci_get web_server_port "")
+    web_server_user=$(uci_get web_server_user "")
+    web_server_password=$(uci_get web_server_password "")
 
     # Validate required fields
     if [ -z "$server_addr" ]; then
@@ -228,6 +257,13 @@ EOF
     [ -n "$heartbeat_interval" ] && echo "heartbeatInterval = $heartbeat_interval" >> "$OUTPUT_FILE"
     [ -n "$heartbeat_timeout" ] && echo "heartbeatTimeout = $heartbeat_timeout" >> "$OUTPUT_FILE"
 
+    # Dial server
+    [ -n "$dial_server_timeout" ] && echo "dialServerTimeout = $dial_server_timeout" >> "$OUTPUT_FILE"
+    [ -n "$dial_server_keepalive" ] && echo "dialServerKeepalive = $dial_server_keepalive" >> "$OUTPUT_FILE"
+    [ -n "$connect_server_local_ip" ] && echo "connectServerLocalIP = \"$connect_server_local_ip\"" >> "$OUTPUT_FILE"
+    [ -n "$proxy_url" ] && echo "proxyURL = \"$proxy_url\"" >> "$OUTPUT_FILE"
+    [ -n "$tcp_mux_keepalive_interval" ] && echo "tcpMuxKeepaliveInterval = $tcp_mux_keepalive_interval" >> "$OUTPUT_FILE"
+
     # TLS
     if [ "$tls_enable" = "1" ]; then
         cat >> "$OUTPUT_FILE" <<EOF
@@ -235,6 +271,20 @@ EOF
 [transport.tls]
 enable = true
 EOF
+        [ "$tls_disable_custom_first_byte" = "1" ] && echo "disableCustomTLSFirstByte = true" >> "$OUTPUT_FILE"
+        [ -n "$tls_cert_file" ] && echo "certFile = \"$tls_cert_file\"" >> "$OUTPUT_FILE"
+        [ -n "$tls_key_file" ] && echo "keyFile = \"$tls_key_file\"" >> "$OUTPUT_FILE"
+        [ -n "$tls_trusted_ca_file" ] && echo "trustedCaFile = \"$tls_trusted_ca_file\"" >> "$OUTPUT_FILE"
+        [ -n "$tls_server_name" ] && echo "serverName = \"$tls_server_name\"" >> "$OUTPUT_FILE"
+    fi
+
+    # QUIC options
+    if [ -n "$quic_keepalive_period" ] || [ -n "$quic_max_idle_timeout" ] || [ -n "$quic_max_incoming_streams" ]; then
+        echo "" >> "$OUTPUT_FILE"
+        echo "[transport.quic]" >> "$OUTPUT_FILE"
+        [ -n "$quic_keepalive_period" ] && echo "keepalivePeriod = $quic_keepalive_period" >> "$OUTPUT_FILE"
+        [ -n "$quic_max_idle_timeout" ] && echo "maxIdleTimeout = $quic_max_idle_timeout" >> "$OUTPUT_FILE"
+        [ -n "$quic_max_incoming_streams" ] && echo "maxIncomingStreams = $quic_max_incoming_streams" >> "$OUTPUT_FILE"
     fi
 
     # Log section
@@ -255,6 +305,16 @@ EOF
         echo "" >> "$OUTPUT_FILE"
         echo "[store]" >> "$OUTPUT_FILE"
         echo "path = \"$store_path\"" >> "$OUTPUT_FILE"
+    fi
+
+    # WebServer
+    if [ -n "$web_server_port" ]; then
+        echo "" >> "$OUTPUT_FILE"
+        echo "[webServer]" >> "$OUTPUT_FILE"
+        [ -n "$web_server_addr" ] && echo "addr = \"$web_server_addr\"" >> "$OUTPUT_FILE"
+        echo "port = $web_server_port" >> "$OUTPUT_FILE"
+        [ -n "$web_server_user" ] && echo "user = \"$web_server_user\"" >> "$OUTPUT_FILE"
+        [ -n "$web_server_password" ] && echo "password = \"$web_server_password\"" >> "$OUTPUT_FILE"
     fi
 }
 
@@ -417,6 +477,48 @@ generate_proxy() {
                 sni_rewrite=$(sec_get "$section" sni_rewrite "")
                 emit "type" "sni"
                 [ -n "$sni_rewrite" ] && emit "hostHeaderRewrite" "$sni_rewrite"
+                ;;
+            http2https)
+                plugin_local_addr=$(sec_get "$section" plugin_local_addr "")
+                plugin_host_header_rewrite=$(sec_get "$section" plugin_host_header_rewrite "")
+                emit "type" "http2https"
+                [ -n "$plugin_local_addr" ] && emit "localAddr" "$plugin_local_addr"
+                [ -n "$plugin_host_header_rewrite" ] && emit "hostHeaderRewrite" "$plugin_host_header_rewrite"
+                ;;
+            https2http)
+                plugin_local_addr=$(sec_get "$section" plugin_local_addr "")
+                plugin_host_header_rewrite=$(sec_get "$section" plugin_host_header_rewrite "")
+                plugin_enable_http2=$(sec_get "$section" plugin_enable_http2 "1")
+                plugin_crt_path=$(sec_get "$section" plugin_crt_path "")
+                plugin_key_path=$(sec_get "$section" plugin_key_path "")
+                emit "type" "https2http"
+                [ -n "$plugin_local_addr" ] && emit "localAddr" "$plugin_local_addr"
+                [ -n "$plugin_host_header_rewrite" ] && emit "hostHeaderRewrite" "$plugin_host_header_rewrite"
+                [ "$plugin_enable_http2" = "0" ] && emit_raw "enableHTTP2" "false"
+                [ -n "$plugin_crt_path" ] && emit "crtPath" "$plugin_crt_path"
+                [ -n "$plugin_key_path" ] && emit "keyPath" "$plugin_key_path"
+                ;;
+            https2https)
+                plugin_local_addr=$(sec_get "$section" plugin_local_addr "")
+                plugin_host_header_rewrite=$(sec_get "$section" plugin_host_header_rewrite "")
+                plugin_enable_http2=$(sec_get "$section" plugin_enable_http2 "1")
+                plugin_crt_path=$(sec_get "$section" plugin_crt_path "")
+                plugin_key_path=$(sec_get "$section" plugin_key_path "")
+                emit "type" "https2https"
+                [ -n "$plugin_local_addr" ] && emit "localAddr" "$plugin_local_addr"
+                [ -n "$plugin_host_header_rewrite" ] && emit "hostHeaderRewrite" "$plugin_host_header_rewrite"
+                [ "$plugin_enable_http2" = "0" ] && emit_raw "enableHTTP2" "false"
+                [ -n "$plugin_crt_path" ] && emit "crtPath" "$plugin_crt_path"
+                [ -n "$plugin_key_path" ] && emit "keyPath" "$plugin_key_path"
+                ;;
+            tls2raw)
+                plugin_local_addr=$(sec_get "$section" plugin_local_addr "")
+                plugin_crt_path=$(sec_get "$section" plugin_crt_path "")
+                plugin_key_path=$(sec_get "$section" plugin_key_path "")
+                emit "type" "tls2raw"
+                [ -n "$plugin_local_addr" ] && emit "localAddr" "$plugin_local_addr"
+                [ -n "$plugin_crt_path" ] && emit "crtPath" "$plugin_crt_path"
+                [ -n "$plugin_key_path" ] && emit "keyPath" "$plugin_key_path"
                 ;;
         esac
         echo ""

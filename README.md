@@ -23,6 +23,10 @@ OpenWrt LuCI 应用 — frpc 内网穿透客户端管理界面
 - 心跳间隔与超时、日志级别与保留天数
 - DNS 服务器、STUN 服务器、UDP 包大小
 - 登录失败策略、持久化 Store、客户端元数据
+- 连接服务器超时/Keepalive/本地IP/代理/TCP Mux 心跳
+- TLS 高级配置（证书/密钥/CA/ServerName/首字节）
+- QUIC 协议选项（保活/空闲超时/最大流）
+- Web 管理面板（地址/端口/用户名/密码）
 
 ### 代理配置
 - HTTP 高级设置：Host 头重写、URL 路径路由、自定义请求头/响应头、按用户路由、多路复用器
@@ -31,7 +35,7 @@ OpenWrt LuCI 应用 — frpc 内网穿透客户端管理界面
 - 健康检查：TCP/HTTP 类型、超时、最大失败次数、间隔、路径、自定义检查头
 - 传输设置：加密、压缩、带宽限制、传输类型、代理协议版本
 - 负载均衡：分组名称、分组密钥
-- 插件支持：socks5、http_proxy、static_file、unix_domain_socket、http2socks、sni
+- 插件支持：socks5、http_proxy、static_file、unix_domain_socket、http2socks、sni、http2https、https2http、https2https、tls2raw
 - 代理元数据、代理注释
 
 ## 项目结构

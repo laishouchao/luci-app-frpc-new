@@ -143,6 +143,30 @@ o.datatype = "uinteger"
 o.placeholder = "90"
 o.rmempty = true
 
+o = s:option(Value, "dial_server_timeout", translate("Dial Server Timeout"),
+	translate("Timeout for connecting to server (seconds, default: 10)"))
+o.datatype = "uinteger"
+o.placeholder = "10"
+o.rmempty = true
+
+o = s:option(Value, "dial_server_keepalive", translate("Dial Server Keepalive"),
+	translate("TCP keepalive interval for server connection (seconds)"))
+o.datatype = "uinteger"
+o.rmempty = true
+
+o = s:option(Value, "connect_server_local_ip", translate("Connect Server Local IP"),
+	translate("Bind local IP when connecting to server"))
+o.rmempty = true
+
+o = s:option(Value, "proxy_url", translate("Proxy URL"),
+	translate("Proxy for server connection (e.g. http://proxy:8080 or socks5://proxy:1080)"))
+o.rmempty = true
+
+o = s:option(Value, "tcp_mux_keepalive_interval", translate("TCP Mux Keepalive Interval"),
+	translate("TCP mux keepalive check interval (seconds)"))
+o.datatype = "uinteger"
+o.rmempty = true
+
 -- ================================================================
 -- Section: Log
 -- ================================================================
@@ -161,6 +185,82 @@ o = s:option(Value, "log_max_days", translate("Log Retention (days)"),
 	translate("Maximum number of days to keep log files"))
 o.datatype = "uinteger"
 o.placeholder = "3"
+o.rmempty = true
+
+-- ================================================================
+-- Section: TLS Advanced
+-- ================================================================
+s = m:section(NamedSection, "main", "frpc", translate("TLS Advanced"),
+	translate("Advanced TLS configuration for server connection"))
+
+o = s:option(Flag, "tls_disable_custom_first_byte", translate("Disable Custom TLS First Byte"),
+	translate("Do not send 0x17 special byte (cannot share port with vhostHTTPS when enabled)"))
+o.default = "0"
+o.rmempty = false
+
+o = s:option(Value, "tls_cert_file", translate("TLS Certificate File"),
+	translate("Path to TLS client certificate file"))
+o.rmempty = true
+
+o = s:option(Value, "tls_key_file", translate("TLS Key File"),
+	translate("Path to TLS client private key file"))
+o.rmempty = true
+
+o = s:option(Value, "tls_trusted_ca_file", translate("TLS CA File"),
+	translate("Path to trusted CA certificate file"))
+o.rmempty = true
+
+o = s:option(Value, "tls_server_name", translate("TLS Server Name"),
+	translate("TLS server name for SNI"))
+o.rmempty = true
+
+-- ================================================================
+-- Section: QUIC Options
+-- ================================================================
+s = m:section(NamedSection, "main", "frpc", translate("QUIC Options"),
+	translate("QUIC protocol options (when transport protocol is QUIC)"))
+
+o = s:option(Value, "quic_keepalive_period", translate("QUIC Keepalive Period"),
+	translate("QUIC keepalive period in seconds (default: 10)"))
+o.datatype = "uinteger"
+o.placeholder = "10"
+o.rmempty = true
+
+o = s:option(Value, "quic_max_idle_timeout", translate("QUIC Max Idle Timeout"),
+	translate("QUIC max idle timeout in seconds (default: 30)"))
+o.datatype = "uinteger"
+o.placeholder = "30"
+o.rmempty = true
+
+o = s:option(Value, "quic_max_incoming_streams", translate("QUIC Max Incoming Streams"),
+	translate("QUIC max incoming streams (default: 100000)"))
+o.datatype = "uinteger"
+o.placeholder = "100000"
+o.rmempty = true
+
+-- ================================================================
+-- Section: Web Server (Admin Dashboard)
+-- ================================================================
+s = m:section(NamedSection, "main", "frpc", translate("Web Server"),
+	translate("Local admin dashboard for frpc (optional)"))
+
+o = s:option(Value, "web_server_addr", translate("Listen Address"),
+	translate("Admin dashboard listen address (default: 127.0.0.1)"))
+o.placeholder = "127.0.0.1"
+o.rmempty = true
+
+o = s:option(Value, "web_server_port", translate("Listen Port"),
+	translate("Admin dashboard listen port"))
+o.datatype = "port"
+o.rmempty = true
+
+o = s:option(Value, "web_server_user", translate("Username"),
+	translate("HTTP Basic Auth username for admin dashboard"))
+o.rmempty = true
+
+o = s:option(Value, "web_server_password", translate("Password"),
+	translate("HTTP Basic Auth password for admin dashboard"))
+o.password = true
 o.rmempty = true
 
 -- ================================================================
